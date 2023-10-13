@@ -7,13 +7,10 @@ import { RefineKbar, RefineKbarProvider } from '@refinedev/kbar';
 import { SessionProvider, useSession, signOut, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import '@styles/globals.css';
-import routerProvider, {
-  UnsavedChangesNotifier,
-} from '@refinedev/nextjs-router';
+import routerProvider, { UnsavedChangesNotifier } from '@refinedev/nextjs-router';
 import { dataProvider } from 'src/rest-data-provider';
 import 'moment/locale/lo';
-
-const API_URL = 'http://127.0.0.1:8000/api/v1';
+import { CLIENT_API_URL , CLIENT_API_V1_URL } from '@src/lib/client-api-constants';
 import 'react-toastify/dist/ReactToastify.css';
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -96,7 +93,7 @@ const App = (props: React.PropsWithChildren) => {
     <RefineKbarProvider>
       <Refine
         routerProvider={routerProvider}
-        dataProvider={dataProvider(API_URL)}
+        dataProvider={dataProvider(CLIENT_API_V1_URL)}
         authProvider={authProvider}
         resources={[
           {
@@ -118,10 +115,7 @@ const App = (props: React.PropsWithChildren) => {
   );
 };
 
-function MyApp ({
-  Component,
-  pageProps: { session, ...pageProps },
-}: AppPropsWithLayout): JSX.Element {
+function MyApp ({ Component, pageProps: { session, ...pageProps } }: AppPropsWithLayout): JSX.Element {
   const renderComponent = () => {
     if (Component.noLayout) {
       return <Component {...pageProps} />;
@@ -131,10 +125,7 @@ function MyApp ({
   };
 
   return (
-    <SessionProvider
-      session={session}
-      basePath={'http://localhost:3000/api/auth'}
-    >
+    <SessionProvider session={session} basePath={`${CLIENT_API_URL}/auth`}>
       <App>{renderComponent()}</App>
     </SessionProvider>
   );

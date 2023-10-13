@@ -2,7 +2,7 @@ import { type NextApiHandler } from 'next';
 import NextAuth, { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import Cors from 'nextjs-cors';
-
+import { SERVER_API_V1_URL, SERVER_SECRET_KEY }  from '@src/lib/server-api-constants';
 interface User {
   id: string;
   name: string;
@@ -15,27 +15,27 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   providers: [
-    CredentialsProvider({
+    CredentialsProvider ({
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize (credentials) {
-        const res = await fetch('http://localhost:8000/api/v1/auth/login/', {
+        const res = await fetch(`${SERVER_API_V1_URL}/auth/login/`, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { 'Content-Type': 'application/json' },
         });
         const data = await res.json();
-        if (res.ok && data?.access_token) {
+        if (res.ok && data?.access) {
           const user: User = {
             name: data.user.username,
             email: data.user.email,
             id: data.user.userId,
             image: null,
           };
-          return { ...user, accessToken: data.access_token };
+          return { ...user, accessToken: data.access };
         }
         return null;
       },
@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: 'bMFZFfDdzpgqlcQZklCdPldjAWAiMxfNZCIHvTtfHhSLyukxLz%',
+  secret: SERVER_SECRET_KEY,
 
   callbacks: {
     async session ({ session, token }) {
@@ -70,9 +70,9 @@ export const authOptions: NextAuthOptions = {
 };
 
 const handler: NextApiHandler = async (req, res) => {
-  await Cors(req, res);
+  await Cors (req, res);
 
-  return NextAuth(req, res, authOptions);
+  return NextAuth (req, res, authOptions);
 };
 
 export default handler;
