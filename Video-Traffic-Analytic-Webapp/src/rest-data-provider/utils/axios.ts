@@ -1,18 +1,23 @@
 import { type HttpError } from '@refinedev/core';
 import axios from 'axios';
+import { SERVER_API_V1_URL } from '@src/lib/server-api-constants';
 
-async function getAccessToken () {
-  const res = await fetch('http://localhost:3000/api/auth/session');
-  const session = await res.json();
-  return session?.user?.accessToken;
+async function getAccessToken(): Promise<string | undefined> {
+  try {
+    const res = await fetch(`${SERVER_API_V1_URL}/auth/session`);
+    const session = await res.json();
+    return session?.user?.accessToken;
+  } catch (error) {
+    return undefined;
+  }
 }
 
-const access_token = await getAccessToken ();
+const access: string | undefined = await getAccessToken();
 
-const axiosInstance = access_token
+const axiosInstance = access
   ? axios.create({
     headers: {
-      Authorization: `Bearer ${access_token}`,
+      Authorization: `Bearer ${access}`,
     },
   })
   : axios.create();
