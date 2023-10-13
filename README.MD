@@ -29,6 +29,8 @@ This application enables Django powered websites to have multiple tenants via Po
     CREATE DATABASE 'video_traffic_analytic'
 ## API
 
+To work with the API, navigate to the `Video-Traffic-Analytic-API` directory:
+
     cd Video-Traffic-Analytic-API
 
 ## Basic Settings for Development
@@ -44,6 +46,8 @@ Activate environment
 Basic Settings
 You’ll have to make the following creations to your your .env file
 and Django Secret Key
+
+This revised version specifies that the `.env` file should be created in the `Video-Traffic-Analytic-API` directory,
 
     DB_NAME=your_database_name
     DB_USR=your_user_name
@@ -68,6 +72,3 @@ and Django Secret Key
     localhost:8000/admin/ or localhost:8000/swagger/
 
 
-## Create a new model
-    cd apps
-    python ../manage.py startapp "folder name"
