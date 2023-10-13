@@ -12,11 +12,6 @@ the application using refinedjs, nextjs, storybook and tailwindcss
 ### Create .env
 
     touch .env
-
-    export SECRET_KEY=your_secret_key
-    export API_ENDPOINT=your_backend_api_endpoint
-    export LOCAL_API_ENDPOINT=your_local_api_endpoint
-
     NEXTAUTH_URL=your_frontend_api
     API_ENDPOINT=your_backend_api_endpoint
     NEXTAUTH_URL_INTERNAL=your_frontend_api
