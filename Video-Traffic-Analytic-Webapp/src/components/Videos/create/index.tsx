@@ -114,7 +114,7 @@ export const VideosCreate: React.FC = ({}) => {
                     {selectedVideo && <source src={URL.createObjectURL(selectedVideo)} />}
                   </video>
                 </div>
-                <div className="pt-[195px] flex w-[720px] pr-20 z-10 absolute top-0  left-[435px]">
+                <div className="pt-[195px] flex w-[720px] pr-20 z-20 absolute top-0  left-[435px]">
                   <input
                     type="range"
                     className="rotate-90 h-2 w-[350px] cursor-ew-resize appearance-none rounded-full  disabled:cursor-not-allowed bg-red-500"
@@ -124,7 +124,7 @@ export const VideosCreate: React.FC = ({}) => {
                     onChange={handleChange}
                   />
                 </div>
-                <div className="pt-[195px] flex w-[720px] pr-96 z-10 absolute top-0  left-[500px]">
+                <div className="pt-[195px] flex  pr-96 z-10 absolute top-0  left-[500px] ">
                   <div className="rotate-90 h-2 w-[350px] text-2xl">ຫົວໄຟອຳນາດຈາລະຈອນ</div>
                 </div>
               </div>
