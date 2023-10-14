@@ -19,6 +19,7 @@ class InfractionTracker(models.Model):
         max_length=255, blank=True, null=True)
     province = models.CharField(max_length=255, blank=True, null=True)
     video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True, null=True)
+    date_time = models.DateTimeField(blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 

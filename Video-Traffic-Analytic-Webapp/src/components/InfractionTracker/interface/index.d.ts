@@ -9,4 +9,5 @@ export interface IVehicleData {
   province: string;
   created_on: string;
   video:number
+  date_time:string
 }

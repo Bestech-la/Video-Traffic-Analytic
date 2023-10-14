@@ -39,7 +39,7 @@ export const Header = (): ColumnDef<IVehicleData>[] => {
               ປ້າຍລົດ: <span>{rowData.vehicle_registration_number}</span>
             </div>
             <div className="text-lg text-center">
-              ເວລາ: <span>{moment(rowData.created_on).format('llll')}</span>
+              ເວລາ: <span>{moment(rowData.date_time).format('YYYY-MM-DD HH:mm:ss')}</span>
             </div>
             <div className="text-lg text-center">
               ສີລົດ: <span>{rowData.vehicle_color}</span>
