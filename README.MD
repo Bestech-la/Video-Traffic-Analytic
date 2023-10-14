@@ -45,6 +45,7 @@ To work with the API, navigate to the `Video-Traffic-Analytic-API` directory:
 ## Basic Settings for Development
 
 Activate environment
+
     python3 -m venv venv
     source venv/bin/activate
 
