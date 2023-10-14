@@ -1,11 +1,11 @@
-import { Dialog, Transition } from '@headlessui/react';
-import React, { Fragment, useState } from 'react';
-import { useOne } from '@refinedev/core';
 import { IVehicleData } from '@components/InfractionTracker/interface';
+import { Dialog, Transition } from '@headlessui/react';
+import React, { Fragment, useState, useRef } from 'react';
+import { useOne } from '@refinedev/core';
 import moment from 'moment';
 
 interface IInfractionTrackerShow {
-  value: number | undefined
+  value: number | undefined;
 }
 
 export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }) => {
@@ -14,11 +14,19 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
     id: value,
   });
   const showData = infraction_tracker_data?.data;
+
+  const { data: videoData } = useOne({
+    resource: 'video',
+    id: showData?.video,
+  });
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [isOpen, setIsOpen] = useState(false);
-  function closeModal () {
+  function closeModal() {
     setIsOpen(false);
   }
-  function openModal () {
+  function openModal() {
     setIsOpen(true);
   }
   return (
@@ -59,18 +67,20 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
               >
                 <Dialog.Panel
                   className=" transform  w-3/4 rounded-2xl bg-white
-                text-left align-middle shadow-xl transition-all"
+                text-left align-middle shadow-xl transition-all "
                 >
-                  <div className="flex flex-wrap  justify-center content-center  mb-6 mx-auto">
-                    <div className="bg-gray-200 rounded-lg p-5 z-50">
+                  <div className="flex flex-wrap  justify-center content-center  mb-6 mx-auto z-50">
+                    <div className="bg-gray-200 rounded-lg p-5">
                       {value ? (
                         <div className="flex flex-col bg-white  rounded-lg p-2">
                           <div className="text-4xl  text-center my-5">ລາຍລະອຽດ</div>
 
-                          <div className="grid grid-cols-5 gap-x-5">
-                            <img src={showData?.image_one} alt="" className="h-[200px] w-full object-fill rounded-lg col-span-2" />
-                            <img src={showData?.image_two} alt="" className="h-[400px]  w-full  object-cover  rounded-lg col-span-2" />
-                            <div className="bg-gray-200 rounded-lg   text-md space-y-2 pl-5 w-full pt-5">
+                          <div className="flex gap-5">
+                            <div className="flex flex-col">
+                              <img src={showData?.image_two} alt="" className="h-[400px] w-full object-cover rounded-lg col-span-2" />
+                              <img src={showData?.image_one} alt="" className="h-[200px] w-full object-fill rounded-lg col-span-2" />
+                            </div>
+                            <div className="bg-gray-200 rounded-lg   text-md space-y-2 pl-5 w-94 pt-5">
                               <div className="p-1">ປ້າຍລົດ: {showData?.vehicle_registration_number}</div>
                               <div className="p-1"> ຍີ້ຫໍ້ລົດ: {showData?.brand}</div>
                               <div className="p-1">ສີລົດ: {showData?.vehicle_color}</div>
@@ -81,6 +91,9 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
                                 {moment(showData?.created_on).format('llll')}
                               </div>
                             </div>
+                            <video ref={videoRef} className=" justify-center my-auto h-[600px] w-[600px]" controls>
+                              <source src={videoData?.data?.video} />
+                            </video>
                           </div>
                         </div>
                       ) : (
