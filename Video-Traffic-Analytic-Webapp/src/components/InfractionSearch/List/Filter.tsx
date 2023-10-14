@@ -7,13 +7,15 @@ interface IFormInput {
 
 interface IFilter {
   refineCore: any;
+  setPlatNumber: any;
 }
-export const Filters: React.FC<IFilter> = ({ refineCore }) => {
+export const Filters: React.FC<IFilter> = ({ refineCore, setPlatNumber }) => {
   const { register, handleSubmit } = useForm<IFormInput>();
 
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
     const car_plate =data?.car_plate;
     Filter(car_plate);
+    setPlatNumber(car_plate);
   };
   const Filter = (car_plate: string) => {
     refineCore.setFilters([

@@ -10,7 +10,7 @@ import { Header } from './Header';
 
 import { CardDetail } from '@components/InfractionSearch/List/cardDetail';
 export const InfractionSearchList: React.FC = ({}) => {
-  const [platNumber] = React.useState('0');
+  const [platNumber, setPlatNumber] = React.useState('0');
   const { data: tracker_data } = useList<any>({
     resource: 'infraction_tracker',
     filters: [
@@ -65,7 +65,7 @@ export const InfractionSearchList: React.FC = ({}) => {
   return (
     <div className=' flex  justify-center  w-3/4  gap-x-1 mx-auto'>
       <div className=' space-y-2'>
-        <Filters refineCore={undefined} />
+        <Filters refineCore={undefined} setPlatNumber={setPlatNumber} />
         <CardDetail tracker_data={tracker_data} />
       </div>
 

@@ -2,7 +2,7 @@ from django.db import models
 from sorl.thumbnail import ImageField
 from django_cleanup.signals import cleanup_pre_delete
 from sorl.thumbnail import delete
-
+from  apps.video.models import Video
 
 class InfractionTracker(models.Model):
     image_one = models.ImageField(
@@ -18,6 +18,7 @@ class InfractionTracker(models.Model):
     vehicle_registration_color = models.CharField(
         max_length=255, blank=True, null=True)
     province = models.CharField(max_length=255, blank=True, null=True)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True, null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 

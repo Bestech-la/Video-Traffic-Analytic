@@ -20,15 +20,11 @@ export const Header = (): ColumnDef<any>[] => {
       id: 'image_one',
       header: 'ຮູບພາບທີ 1',
       accessorKey: 'image_one',
-      cell: function render ({ getValue }) {
+      cell: function render({ getValue }) {
         const image = getValue() as string;
         return (
           <div>
-            <img
-              src={image}
-              alt='bill'
-              className='h-[100px] w-[200px] m-auto object-fill'
-            />
+            <img src={image} alt="bill" className="h-[100px] w-[200px] m-auto object-fill" />
           </div>
         );
       },
@@ -37,15 +33,11 @@ export const Header = (): ColumnDef<any>[] => {
       id: 'image_two',
       header: 'ຮູບພາບທີ 2',
       accessorKey: 'image_two',
-      cell: function render ({ getValue }) {
+      cell: function render({ getValue }) {
         const image = getValue() as string;
         return (
           <div>
-            <img
-              src={image}
-              alt='bill'
-              className='h-[200px] w-[200px] m-auto object-cover'
-            />
+            <img src={image} alt="bill" className="h-[200px] w-[200px] m-auto object-cover" />
           </div>
         );
       },
@@ -54,24 +46,20 @@ export const Header = (): ColumnDef<any>[] => {
       id: 'created_on',
       accessorKey: 'created_on',
       header: 'ເວລາລ່ວງລະເມີດ',
-      cell: function render ({ getValue }) {
+      cell: function render({ getValue }) {
         const date = getValue() as string;
-        return (
-          <div className='text-lg text-center'>
-            {moment(date).format('llll')}
-          </div>
-        );
+        return <div className="text-lg text-center">{moment(date).format('llll')}</div>;
       },
     },
     {
       id: 'actions',
       accessorKey: 'id',
       header: 'ເບີ່ງລາຍລະອຽດ',
-      cell: function render ({ getValue }) {
+      cell: function render({ getValue }) {
         const value = getValue() as number | undefined;
         return (
-          <div className='hover:text-blue-500 text-lg text-center'>
-            <InfractionSearchShow value={value}/>
+          <div className="hover:text-blue-500 text-lg text-center">
+            <InfractionSearchShow value={value} />
           </div>
         );
       },

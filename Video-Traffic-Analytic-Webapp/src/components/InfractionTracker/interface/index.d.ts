@@ -8,4 +8,5 @@ export interface IVehicleData {
   vehicle_registration_color: string;
   province: string;
   created_on: string;
+  video:number
 }

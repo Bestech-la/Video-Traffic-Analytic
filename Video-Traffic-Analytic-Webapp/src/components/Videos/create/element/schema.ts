@@ -13,7 +13,7 @@ import * as yup from 'yup';
 
 
 export const schema = yup.object().shape({
-  location_name: yup.string().required('ສະຖານທີ'),
+  // location_name: yup.string().required('ສະຖານທີ'),
   // yOne: yup.number().required('y 1'),
   // yTwo: yup.number().required('y 2'),
   // video: yup.object().shape({

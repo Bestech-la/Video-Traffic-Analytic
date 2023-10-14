@@ -12,6 +12,7 @@ the application using refinedjs, nextjs, storybook and tailwindcss
 ### Create .env
 
     touch .env
+    
     NEXTAUTH_URL=your_frontend_api
     API_ENDPOINT=your_backend_api_endpoint
     NEXTAUTH_URL_INTERNAL=your_frontend_api
