@@ -34,7 +34,9 @@ class ListCreateAPIView(ListCreateAPIView):
             created_video = serializer.save()
             video_id = created_video.id
 
-            car_cascade = cv2.CascadeClassifier('model/haarcascade_eye.xml')
+            # car_cascade = cv2.CascadeClassifier('model/haarcascade_eye.xml')
+            car_cascade = cv2.CascadeClassifier('model/haarcascade_cars.xml')
+            
             height = 720
             width = 1280
 
