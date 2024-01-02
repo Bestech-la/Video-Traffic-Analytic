@@ -12,7 +12,7 @@ const Landing: React.FC = () => {
     <Navbar>
       <VideoLayout/>
       <InfractionTrackerPage />
-      <InfractionSearchPage />
+      {/* <InfractionSearchPage /> */}
     </Navbar>
   );
 };

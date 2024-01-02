@@ -20,6 +20,7 @@ TEMPLATE_DIR = BASE_DIR / "templates/"
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True
+
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
@@ -142,9 +143,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:8000",
     "http://localhost:6006",
-
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:6006",
+    "http://127.0.0.1:8000",
 ]
 
 REST_FRAMEWORK = {
