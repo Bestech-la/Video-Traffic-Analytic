@@ -13,7 +13,6 @@ from django.core.files import File
 import re
 import pytesseract
 from datetime import datetime
-import time 
 class ListCreateAPIView(ListCreateAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
@@ -314,27 +313,17 @@ def post_image(image_file_path):
         print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time} seconds")
 
 
-relative_path = "Video-Traffic-Analytic-API/apps/image_test/2324.png"
-absolute_path = os.path.abspath(relative_path)
-print(f"Absolute path: {absolute_path}")
 cumulative_elapsed_total_time_pytesseract = 0
-
-
-def perform_ocr():
+def perform_ocr(image_path):
     global cumulative_elapsed_total_time_pytesseract
     start_total_time = time.time()
     try:
-        # absolute_path = os.path.abspath(image_path)
-        print("absolute_path", absolute_path)
-        image_path = 'apps/image_test/9510.png'
-        img = Image.open(image_path)
         image = Image.open(image_path)
         dpi = (300, 300)
         image.info['dpi'] = dpi
         image.save(image_path, dpi=dpi)
         custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
         car_info = pytesseract.image_to_string(image_path, config=custom_config, lang='lao')
-        print(f"OCR result: {car_info}")
         return car_info
     except Exception as e:
         print(f"Error during OCR: {e}")
@@ -346,16 +335,16 @@ def perform_ocr():
         print(f"Total processing time: {elapsed_total_time} seconds")
         print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time_pytesseract} seconds")
 
-perform_ocr()
 
-# image_folder = "Video-Traffic-Analytic-API/apps/image_test/"
-# image_extension = ".png"
+image_folder = "Video-Traffic-Analytic-API/apps/video/api/v1/image_test/"
+image_extension = ".png"
 
-# if os.path.exists(image_folder):
-#     for filename in os.listdir(image_folder):
-#         if filename.endswith(image_extension):
-#             image_path = os.path.join(image_folder, filename)
-#             result = perform_ocr(image_path)
-#             print(f"OCR result for {image_path}: {result}")
-# else:
-#     print(f"The folder {image_folder} does not exist.")
+
+for i in range(239, 250):
+    image_path = os.path.join(image_folder, f"{i:04d}{image_extension}")
+    print(f"Checking image file: {image_path}")
+    if os.path.exists(image_path):
+        result = perform_ocr(image_path)
+        print(f"OCR result for {image_path}: {result}")
+    else:
+        print(f"Image file not found: {image_path}")
