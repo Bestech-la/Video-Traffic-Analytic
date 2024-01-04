@@ -72,7 +72,6 @@ class ListCreateAPIView(ListCreateAPIView):
                     start_time = current_time
                     
                 timestamp = date_time + timedelta(seconds=current_time)
-                print('Timestamp:', timestamp)
 
                 cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (0, 0, 255), 2)
                 cv2.line(frame, (0, green_line_y), (frame.shape[1], green_line_y), (0, 255, 0), 2)
@@ -142,8 +141,7 @@ class ListCreateAPIView(ListCreateAPIView):
                             upper_red = np.array([10, 255, 255])
                             output_cropped_path_red = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
                             detect_and_crop_car_plate(img_path_cars, output_cropped_path_red, lower_red, upper_red, 'red')
-
-                            # Yellow Car Plate Detection
+                            
                             lower_yellow = np.array([20, 100, 100])
                             upper_yellow = np.array([30, 255, 255])
                             output_cropped_path_yellow = f'captured_images/yellow_1_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
@@ -227,12 +225,12 @@ class ListCreateAPIView(ListCreateAPIView):
                                                 img_file_car.close()
                                                 # os.remove(img_path_car)
                                                 print("Car image saved for report with ID:", report.id)
-                                        else:
-                                            print("Image not saved (already captured):", img_path)
-                                    else:
-                                        print("Car information format is invalid:", car_info)
-                                else:
-                                    print("Car information format does not match:", car_info)
+                                #         else:
+                                #             print("Image not saved (already captured):", img_path)
+                                #     else:
+                                #         print("Car information format is invalid:", car_info)
+                                # else:
+                                #     print("Car information format does not match:", car_info)
 
             cap.release()
 
@@ -250,7 +248,7 @@ def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper,
         color_mask = cv2.inRange(hsv, color_lower, color_upper)
         contours, _ = cv2.findContours(color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
-
+        
         if contours:
             max_contour = contours[0]
             (x, y, w, h) = cv2.boundingRect(max_contour)
@@ -264,12 +262,43 @@ def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper,
                 new_width = min(min_width, int(min_height * aspect_ratio))
                 new_height = min(min_height, int(min_width / aspect_ratio))
                 plate = cv2.resize(plate, (new_width, new_height))
+                
+            # Resize the plate
+            resized_plate_path = f'captured_images/resized_{color_name.lower()}_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
+            resize_and_save(output_path, resized_plate_path, min_width, min_height)
 
-            plate_gray = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
-            text = pytesseract.image_to_string(plate_gray, config='--psm 11')
-            print(f"Detected {color_name} car plate number is:", text)
+            # Save the resized plate
+            cv2.imwrite(resized_plate_path, plate)
+
+
+            # # Configurations before red text
+            # image = Image.open(resized_plate_path)
+            # dpi = (300, 300)
+            # image.info['dpi'] = dpi
+            # image.save(resized_plate_path, dpi=dpi)
+
+            custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+            car_info = pytesseract.image_to_string(resized_plate_path, config=custom_config, lang='lao')
+            print(f"Detected {color_name} car plate number is:", car_info)
         else:
             print(f"{color_name.capitalize()} car plate not detected.")
     except Exception as e:
         print(f"Error: {e}")
         return
+    
+def resize_and_save(image_path, output_path, min_width, min_height):
+    try:
+        img = cv2.imread(image_path)
+
+        if img is None:
+            print(f"Error: Unable to read image at path {image_path}")
+            return None
+
+        resized_img = cv2.resize(img, (min_width, min_height))
+        cv2.imwrite(output_path, resized_img)
+
+        return output_path
+    except Exception as e:
+        print(f"Error during image resizing: {e}")
+        return None
+
