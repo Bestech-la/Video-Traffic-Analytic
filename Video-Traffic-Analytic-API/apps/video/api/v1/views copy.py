@@ -13,6 +13,9 @@ from django.core.files import File
 import re
 import pytesseract
 from datetime import datetime
+import time 
+import imutils
+
 class ListCreateAPIView(ListCreateAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
@@ -34,9 +37,7 @@ class ListCreateAPIView(ListCreateAPIView):
             created_video = serializer.save()
             video_id = created_video.id
 
-            # car_cascade = cv2.CascadeClassifier('model/haarcascade_eye.xml')
             car_cascade = cv2.CascadeClassifier('model/haarcascade_cars.xml')
-            
             height = 720
             width = 1280
 
@@ -71,6 +72,7 @@ class ListCreateAPIView(ListCreateAPIView):
                     start_time = current_time
                     
                 timestamp = date_time + timedelta(seconds=current_time)
+                print('Timestamp:', timestamp)
 
                 cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (0, 0, 255), 2)
                 cv2.line(frame, (0, green_line_y), (frame.shape[1], green_line_y), (0, 255, 0), 2)
@@ -124,61 +126,27 @@ class ListCreateAPIView(ListCreateAPIView):
                                 dominant_color = "ສີຂາວ"
 
                             hsv_car_plate = cv2.cvtColor(hsv_roi, cv2.COLOR_BGR2HSV)
-                            # lower_yellow = np.array([20, 100, 100])
-                            # upper_yellow = np.array([30, 255, 255])
-                            # yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
-                            # # contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                            lower_yellow = np.array([20, 100, 100])
+                            upper_yellow = np.array([30, 255, 255])
 
-                            # Crop the blue car
-                            lower_blue = np.array([100, 50, 50])
-                            upper_blue = np.array([140, 255, 255])
-                            blue_mask = cv2.inRange(hsv_car_plate, lower_blue, upper_blue)
-                            contours, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                            
-                            img_path_red_car = f'captured_images/red_car_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            cv2.imwrite(img_path_red_car, blue_mask)
-                            
-                            # # Save images
-                            # img_path_blue_car = f'captured_images/blue_car_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            # cv2.imwrite(img_path_blue_car, blue_car)
+                            yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
 
-                            # img_path_red_car = f'captured_images/red_car_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            # cv2.imwrite(img_path_red_car, red_car)
+                            contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                            # img_path_yellow_info = f'captured_images/yellow_info_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            # cv2.imwrite(img_path_yellow_info, yellow_info)
-
-                            # contours, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-                            # if contours:
-                            #     max_yellow_area = max(contours, key=cv2.contourArea)
-                            #     x, y, w, h = cv2.boundingRect(max_yellow_area)
-
-                            #     yellow_car_plate = hsv_roi[y:y + h, x:x + w]
-
-                            #     if yellow_car_plate.shape[1] < min_width or yellow_car_plate.shape[0] < min_height:
-                            #         aspect_ratio = yellow_car_plate.shape[1] / yellow_car_plate.shape[0]
-                            #         new_width = min(min_width, int(min_height * aspect_ratio))
-                            #         new_height = min(min_height, int(min_width / aspect_ratio))
-                            #         yellow_car_plate = cv2.resize(yellow_car_plate, (new_width, new_height))
-
-                            #     img_path = f'captured_images/yellow_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            #     cv2.imwrite(img_path, yellow_car_plate)
-                            
                             if contours:
-                                max_blue_area = max(contours, key=cv2.contourArea)
-                                x_blue, y_blue, w_blue, h_blue = cv2.boundingRect(max_blue_area)
+                                max_yellow_area = max(contours, key=cv2.contourArea)
+                                x, y, w, h = cv2.boundingRect(max_yellow_area)
 
-                                blue_car_plate = hsv_roi[y_blue:y_blue + h_blue, x_blue:x_blue + w_blue]
+                                yellow_car_plate = hsv_roi[y:y + h, x:x + w]
 
-                                if blue_car_plate.shape[1] < min_width or blue_car_plate.shape[0] < min_height:
-                                    aspect_ratio_blue = blue_car_plate.shape[1] / blue_car_plate.shape[0]
-                                    new_width_blue = min(min_width, int(min_height * aspect_ratio_blue))
-                                    new_height_blue = min(min_height, int(min_width / aspect_ratio_blue))
-                                    blue_car_plate = cv2.resize(blue_car_plate, (new_width_blue, new_height_blue))
+                                if yellow_car_plate.shape[1] < min_width or yellow_car_plate.shape[0] < min_height:
+                                    aspect_ratio = yellow_car_plate.shape[1] / yellow_car_plate.shape[0]
+                                    new_width = min(min_width, int(min_height * aspect_ratio))
+                                    new_height = min(min_height, int(min_width / aspect_ratio))
+                                    yellow_car_plate = cv2.resize(yellow_car_plate, (new_width, new_height))
 
-                                img_path = f'captured_images/blue_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                                cv2.imwrite(img_path, blue_car_plate)
+                                img_path = f'captured_images/yellow_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
+                                cv2.imwrite(img_path, yellow_car_plate)
 
                                 image_plate = cv2.imread(img_path)
                                 roi_height = image_plate.shape[0] // 5
@@ -205,27 +173,23 @@ class ListCreateAPIView(ListCreateAPIView):
                                     dominant_plate_color = "ສີເທົາ"
                                 elif 150 <= dominant_hue_plate < 180:
                                     dominant_plate_color = "ສີຂາວ"
-                                    
-                                print(f"dominant_plate_color", dominant_plate_color)
 
                                 image = Image.open(img_path)
                                 dpi = (300, 300)
                                 image.info['dpi'] = dpi
                                 image.save(img_path, dpi=dpi)
                                 custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                                car_info = pytesseract.image_to_string(blue_car_plate, config=custom_config, lang='lao')
+                                car_info = pytesseract.image_to_string(yellow_car_plate, config=custom_config, lang='lao')
                                 match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_info)
                                 if match:
                                     text_part = match.group(1)
                                     number_part = match.group(2)
                                     if len(text_part) == 2 and number_part.isdigit() and len(number_part) == 4:
                                         car_plate = f'{text_part} {number_part}'
-                                        print(f"car_plate", car_plate)
                                         if car_plate not in captured_car_plates:
                                             captured_car_plates.add(car_plate)
                                             with open(img_path, 'rb') as img_file:
                                                 image_file = File(img_file)
-                                                # timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
                                                 report = InfractionTracker.objects.create(
                                                     vehicle_registration_number=car_plate,
                                                     vehicle_color=dominant_color,
@@ -235,19 +199,21 @@ class ListCreateAPIView(ListCreateAPIView):
                                                 )
                                                 report.image_one.save(os.path.basename(img_path), image_file)
                                                 img_file.close()
-                                                # print("Report saved with ID:", report.id)
+                                                # os.remove(img_path)
+                                                print("Report saved with ID:", report.id)
 
                                             with open(img_path_car, 'rb') as img_file_car:
                                                 image_file_car = File(img_file_car)
                                                 report.image_two.save(os.path.basename(img_path_car), image_file_car)
                                                 img_file_car.close()
-                                                # print("Car image saved for report with ID:", report.id)
-                                    #     else:
-                                    #         print("Image not saved (already captured):", img_path)
-                                    # else:
-                                    #     print("Car information format is invalid:", car_info)
-                                # else:
-                                #     print("Car information format does not match:", car_info)
+                                                # os.remove(img_path_car)
+                                                print("Car image saved for report with ID:", report.id)
+                                        else:
+                                            print("Image not saved (already captured):", img_path)
+                                    else:
+                                        print("Car information format is invalid:", car_info)
+                                else:
+                                    print("Car information format does not match:", car_info)
 
             cap.release()
 
@@ -255,96 +221,66 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
-
-
-
-def call_image_to_text_api(result_image, lang="lao"):
-    api_url = f"https://api.branah.com/api/image/imagetotext?filename={result_image}&lang={lang}"
-    print(f"api_url", api_url)
+def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper, color_name, min_width=900, min_height=300):
     try:
-        while True:
-            response = requests.get(api_url)
-            response.raise_for_status()
-            if response.status_code == 202:
-                print("Waiting for API to process image...")
-                time.sleep(5)
+        img = cv2.imread(image_path)
+        if img is None:
+            raise Exception(f"Error: Unable to read image at path {image_path}")
+        print("image_path", image_path)
+
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        color_mask = cv2.inRange(hsv, color_lower, color_upper)
+
+        # Use a closing operation to fill gaps in between object edges
+        kernel = np.ones((5, 5), np.uint8)
+        color_mask_closed = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, kernel)
+
+        contours, _ = cv2.findContours(color_mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
+
+        if contours:
+            max_contour = contours[0]
+            (x, y, w, h) = cv2.boundingRect(max_contour)
+            plate = img[y:y + h, x:x + w]
+            black_mask = cv2.inRange(plate, (0, 0, 0), (1, 1, 1))
+            plate[black_mask == 255] = [255, 255, 255]
+
+            if plate.shape[1] < min_width or plate.shape[0] < min_height:
+                aspect_ratio = plate.shape[1] / plate.shape[0]
+                new_width = min(min_width, int(min_height * aspect_ratio))
+                new_height = min(min_height, int(min_width / aspect_ratio))
+                resized_plate = cv2.resize(plate, (new_width, new_height))
+
+                # Save the resized plate
+                cv2.imwrite(output_path, resized_plate)
+
+                custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+                car_info = pytesseract.image_to_string(resized_plate, config=custom_config, lang='lao')
+
+                # Use color-specific features to differentiate between red and yellow plates
+                if color_name == 'red' and hsv[y + h // 2, x + w // 2, 1] > 50:  # Adjust the saturation threshold as needed
+                    print(f"Detected {color_name} car plate number is:", car_info)
+                elif color_name == 'yellow' and hsv[y + h // 2, x + w // 2, 1] <= 50:  # Adjust the saturation threshold as needed
+                    print(f"Detected {color_name} car plate number is:", car_info)
+                else:
+                    print(f"Ignore {color_name} car plate. Unrecognized color.")
             else:
-                print(f"Processing complete")
-                break
-        result = response.content.encode('utf-8')
-        print(f"API Response", result)
-        return result
-    except requests.exceptions.RequestException as e:
-        print(f"Error calling API: {e}")
-        return None
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return None
-    
-cumulative_elapsed_total_time = 0
-def post_image(image_file_path):
-    global cumulative_elapsed_total_time
-    api_url = "https://api.branah.com/api/file/upload"
-    print('image not found image_file_path, image_file_path')
-    start_total_time = time.time()
-    try:
-        if os.path.exists(image_file_path):
-            with open(image_file_path, 'rb') as image_file:
-                filename = {'file': (os.path.basename(image_file.name), image_file, 'image/png')}
-                response = requests.post(api_url, files=filename) 
-                response.raise_for_status()
-                result_image = response.content.decode('utf-8') 
-                call_image_to_text_api(result_image)
-            return response
+                print(f"{color_name.capitalize()} car plate not detected. Resizing issue.")
         else:
-            print("Image file not found:", image_file_path)
-            return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error calling API: {e}")
-        return None
+            print(f"{color_name.capitalize()} car plate not detected. Contours not found.")
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        return None
-    finally:
-        end_total_time = time.time()
-        elapsed_total_time = end_total_time - start_total_time
-        cumulative_elapsed_total_time += elapsed_total_time
-        print(f"Total processing time: {elapsed_total_time} seconds")
-        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time} seconds")
+        print(f"Error: {e}")
+        return
 
+input_image_path_red = 'apps/image_test/illegal_car_18.png'
+input_image_path_blue = 'apps/image_test/car_color_49.png'
+input_image_path_yellow  = 'apps/image_test/car_color_47.png'
 
-cumulative_elapsed_total_time_pytesseract = 0
-def perform_ocr(image_path):
-    global cumulative_elapsed_total_time_pytesseract
-    start_total_time = time.time()
-    try:
-        image = Image.open(image_path)
-        dpi = (300, 300)
-        image.info['dpi'] = dpi
-        image.save(image_path, dpi=dpi)
-        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-        car_info = pytesseract.image_to_string(image_path, config=custom_config, lang='lao')
-        return car_info
-    except Exception as e:
-        print(f"Error during OCR: {e}")
-        return None
-    finally:
-        end_total_time = time.time()
-        elapsed_total_time = end_total_time - start_total_time
-        cumulative_elapsed_total_time_pytesseract += elapsed_total_time
-        print(f"Total processing time: {elapsed_total_time} seconds")
-        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time_pytesseract} seconds")
+output_cropped_path_red = 'apps/image_test/car_color_47_cropped_red.png'
+detect_and_crop_car_plate(input_image_path_red, output_cropped_path_red, np.array([0, 100, 100]), np.array([10, 255, 255]), 'red')
 
+output_cropped_path_blue = 'apps/image_test/car_color_47_cropped_blue.png'
+detect_and_crop_car_plate(input_image_path_blue, output_cropped_path_blue, np.array([100, 100, 100]), np.array([140, 255, 255]), 'blue')
 
-image_folder = "Video-Traffic-Analytic-API/apps/video/api/v1/image_test/"
-image_extension = ".png"
-
-
-for i in range(239, 250):
-    image_path = os.path.join(image_folder, f"{i:04d}{image_extension}")
-    print(f"Checking image file: {image_path}")
-    if os.path.exists(image_path):
-        result = perform_ocr(image_path)
-        print(f"OCR result for {image_path}: {result}")
-    else:
-        print(f"Image file not found: {image_path}")
+output_cropped_path_yellow = 'apps/image_test/car_color_47_cropped_yellow.png'
+detect_and_crop_car_plate(input_image_path_yellow, output_cropped_path_yellow, np.array([20, 100, 100]), np.array([30, 255, 255]), 'yellow')

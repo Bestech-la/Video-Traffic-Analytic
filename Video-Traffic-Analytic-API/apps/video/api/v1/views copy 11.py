@@ -125,16 +125,34 @@ class ListCreateAPIView(ListCreateAPIView):
                                 dominant_color = "ສີຂາວ"                            
                             
                             hsv_car_plate = cv2.cvtColor(hsv_roi, cv2.COLOR_BGR2HSV)
-                            lower_red = np.array([0, 100, 100])
-                            upper_red = np.array([10, 255, 255])
-                            red_mask = cv2.inRange(hsv_car_plate, lower_red, upper_red)
-                            contours_red, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+                            #  Car plat yellow
                             lower_yellow = np.array([20, 100, 100])
                             upper_yellow = np.array([30, 255, 255])
                             yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
                             contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
                             
+                            
+                            #  Car plat red
+                            lower_red = np.array([0, 100, 100])
+                            upper_red = np.array([10, 255, 255])
+                            red_mask = cv2.inRange(hsv_car_plate, lower_red, upper_red)
+                            contours_red, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                                                        
+                            if contours_red:
+                                max_red_area = max(contours_red, key=cv2.contourArea)
+                                x, y, w, h = cv2.boundingRect(max_red_area)
+
+                                red_car_plate = hsv_roi[y:y + h, x:x + w]
+
+                                if red_car_plate.shape[1] < min_width or red_car_plate.shape[0] < min_height:
+                                    aspect_ratio = red_car_plate.shape[1] / red_car_plate.shape[0]
+                                    new_width = min(min_width, int(min_height * aspect_ratio))
+                                    new_height = min(min_height, int(min_width / aspect_ratio))
+                                    red_car_plate = cv2.resize(red_car_plate, (new_width, new_height))
+
+                                img_path = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
+                                cv2.imwrite(img_path, red_car_plate)
+
                             if contours:
                                 max_yellow_area = max(contours, key=cv2.contourArea)
                                 x, y, w, h = cv2.boundingRect(max_yellow_area)
@@ -207,73 +225,9 @@ class ListCreateAPIView(ListCreateAPIView):
                                                 report.image_two.save(os.path.basename(img_path_car), image_file_car)
                                                 img_file_car.close()
 
-                            if contours_red:
-                                max_red_area = max(contours_red, key=cv2.contourArea)
-                                x_red, y_red, w_red, h_red = cv2.boundingRect(max_red_area)
-
-                                red_car_plate = hsv_roi[y_red:y_red + h_red, x_red:x_red + w_red]
-
-                                if red_car_plate.shape[1] < min_width or red_car_plate.shape[0] < min_height:
-                                    aspect_ratio_red = red_car_plate.shape[1] / red_car_plate.shape[0]
-                                    new_width_red = min(min_width, int(min_height * aspect_ratio_red))
-                                    new_height_red = min(min_height, int(min_width / aspect_ratio_red))
-                                    red_car_plate = cv2.resize(red_car_plate, (new_width_red, new_height_red))
-
-                                    img_path_red = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                                    cv2.imwrite(img_path_red, red_car_plate)
-                                    
-                            lower_blue = np.array([100, 150, 0])
-                            upper_blue = np.array([140, 255, 255])
-                            blue_mask = cv2.inRange(hsv_car_plate, lower_blue, upper_blue)
-                            contours_blue, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                                                            
-                            if contours_blue:
-                                max_blue_area = max(contours_blue, key=cv2.contourArea)
-                                x_blue, y_blue, w_blue, h_blue = cv2.boundingRect(max_blue_area)
-
-                                blue_car_plate = hsv_roi[y_blue:y_blue + h_blue, x_blue:x_blue + w_blue]
-
-                                if blue_car_plate.shape[1] < min_width or blue_car_plate.shape[0] < min_height:
-                                    aspect_ratio_blue = blue_car_plate.shape[1] / blue_car_plate.shape[0]
-                                    new_width_blue = min(min_width, int(min_height * aspect_ratio_blue))
-                                    new_height_blue = min(min_height, int(min_width / aspect_ratio_blue))
-                                    blue_car_plate = cv2.resize(blue_car_plate, (new_width_blue, new_height_blue))
-
-                                img_path_blue = f'captured_images/blue_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                                cv2.imwrite(img_path_blue, blue_car_plate)
-
-                                custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                                car_info = pytesseract.image_to_string(blue_car_plate, config=custom_config, lang='lao')
-                                print(f"car_info: {car_info}")
-                                match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_info)
-                                if match:
-                                    text_part = match.group(1)
-                                    number_part = match.group(2)
-                                    if len(text_part) == 2 and number_part.isdigit() and len(number_part) == 4:
-                                        car_plate = f'{text_part} {number_part}'
-                                        if car_plate not in captured_car_plates:
-                                            captured_car_plates.add(car_plate)
-                                            with open(img_path_blue, 'rb') as img_file_blue:
-                                                image_file_blue = File(img_file_blue)
-                                                report = InfractionTracker.objects.create(
-                                                    vehicle_registration_number=car_plate,
-                                                    vehicle_color=dominant_color,
-                                                    vehicle_registration_color="ສີຟ້າ",
-                                                    video=created_video,
-                                                    date_time=timestamp,
-                                                )
-                                                report.image_one.save(os.path.basename(img_path_blue), image_file_blue)
-                                                img_file_blue.close()
-
-                                            with open(img_path_car, 'rb') as img_file_car:
-                                                image_file_car = File(img_file_car)
-                                                report.image_two.save(os.path.basename(img_path_car), image_file_car)
-                                                img_file_car.close()
-
             cap.release()
+
 class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
-
-
