@@ -128,28 +128,9 @@ class ListCreateAPIView(ListCreateAPIView):
                             hsv_car_plate = cv2.cvtColor(hsv_roi, cv2.COLOR_BGR2HSV)
                             lower_yellow = np.array([20, 100, 100])
                             upper_yellow = np.array([30, 255, 255])
-                            
-                            
-
-                            # Blue Car Plate Detection
-                            lower_blue = np.array([100, 100, 100])
-                            upper_blue = np.array([140, 255, 255])
-                            output_cropped_path_blue = f'captured_images/blue_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_blue, lower_blue, upper_blue, 'blue')
-
-                            # Red Car Plate Detection
-                            lower_red = np.array([0, 100, 100])
-                            upper_red = np.array([10, 255, 255])
-                            output_cropped_path_red = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_red, lower_red, upper_red, 'red')
-
-                            # Yellow Car Plate Detection
-                            lower_yellow = np.array([20, 100, 100])
-                            upper_yellow = np.array([30, 255, 255])
-                            output_cropped_path_yellow = f'captured_images/yellow_1_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_yellow, lower_yellow, upper_yellow, 'yellow')
 
                             yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
+
                             contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
                             if contours:
@@ -209,6 +190,7 @@ class ListCreateAPIView(ListCreateAPIView):
                                             captured_car_plates.add(car_plate)
                                             with open(img_path, 'rb') as img_file:
                                                 image_file = File(img_file)
+                                                # timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
                                                 report = InfractionTracker.objects.create(
                                                     vehicle_registration_number=car_plate,
                                                     vehicle_color=dominant_color,
@@ -241,35 +223,238 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
     
-def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper, color_name, min_width=900, min_height=300):
+def call_image_to_text_api(result_image, lang="lao"):
+    api_url = f"https://api.branah.com/api/image/imagetotext?filename={result_image}&lang={lang}"
+    print(f"api_url", api_url)
     try:
-        img = cv2.imread(image_path)
-        if img is None:
-            raise Exception(f"Error: Unable to read image at path {image_path}")
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        color_mask = cv2.inRange(hsv, color_lower, color_upper)
-        contours, _ = cv2.findContours(color_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
-
-        if contours:
-            max_contour = contours[0]
-            (x, y, w, h) = cv2.boundingRect(max_contour)
-            plate = img[y:y + h, x:x + w]
-            black_mask = cv2.inRange(plate, (0, 0, 0), (1, 1, 1))
-            plate[black_mask == 255] = [255, 255, 255]
-            cv2.imwrite(output_path, plate)
-            
-            if plate.shape[1] < min_width or plate.shape[0] < min_height:
-                aspect_ratio = plate.shape[1] / plate.shape[0]
-                new_width = min(min_width, int(min_height * aspect_ratio))
-                new_height = min(min_height, int(min_width / aspect_ratio))
-                plate = cv2.resize(plate, (new_width, new_height))
-
-            plate_gray = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
-            text = pytesseract.image_to_string(plate_gray, config='--psm 11')
-            print(f"Detected {color_name} car plate number is:", text)
-        else:
-            print(f"{color_name.capitalize()} car plate not detected.")
+        while True:
+            response = requests.get(api_url)
+            response.raise_for_status()
+            if response.status_code == 202:
+                print("Waiting for API to process image...")
+                time.sleep(5)
+            else:
+                print(f"Processing complete")
+                break
+        result = response.content.encode('utf-8')
+        print(f"API Response", result)
+        return result
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling API: {e}")
+        return None
     except Exception as e:
-        print(f"Error: {e}")
-        return
+        print(f"Unexpected error: {e}")
+        return None
+    
+cumulative_elapsed_total_time = 0
+def post_image(image_file_path):
+    global cumulative_elapsed_total_time
+    api_url = "https://api.branah.com/api/file/upload"
+    print('image not found image_file_path, image_file_path')
+    start_total_time = time.time()
+    try:
+        if os.path.exists(image_file_path):
+            with open(image_file_path, 'rb') as image_file:
+                filename = {'file': (os.path.basename(image_file.name), image_file, 'image/png')}
+                response = requests.post(api_url, files=filename) 
+                response.raise_for_status()
+                result_image = response.content.decode('utf-8') 
+                call_image_to_text_api(result_image)
+            return response
+        else:
+            print("Image file not found:", image_file_path)
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling API: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+    finally:
+        end_total_time = time.time()
+        elapsed_total_time = end_total_time - start_total_time
+        cumulative_elapsed_total_time += elapsed_total_time
+        print(f"Total processing time: {elapsed_total_time} seconds")
+        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time} seconds")
+
+
+relative_path = "apps/image_test/illegal_car_8.png"
+absolute_path = os.path.abspath(relative_path)
+print(f"Absolute path: {absolute_path}")
+cumulative_elapsed_total_time_pytesseract = 0
+
+
+def perform_ocr():
+    global cumulative_elapsed_total_time_pytesseract
+    start_total_time = time.time()
+    try:
+        # absolute_path = os.path.abspath(image_path)
+        print("absolute_path", absolute_path)
+        image_path = 'apps/image_test/9510.png'
+        img = Image.open(image_path)
+        image = Image.open(image_path)
+        dpi = (300, 300)
+        image.info['dpi'] = dpi
+        image.save(image_path, dpi=dpi)
+        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+        car_info = pytesseract.image_to_string(image_path, config=custom_config, lang='lao')
+        print(f"OCR result: {car_info}")
+        return car_info
+    except Exception as e:
+        print(f"Error during OCR: {e}")
+        return None
+    finally:
+        end_total_time = time.time()
+        elapsed_total_time = end_total_time - start_total_time
+        cumulative_elapsed_total_time_pytesseract += elapsed_total_time
+        print(f"Total processing time: {elapsed_total_time} seconds")
+        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time_pytesseract} seconds")
+
+perform_ocr()
+
+# image_folder = "Video-Traffic-Analytic-API/apps/image_test/"
+# image_extension = ".png"
+
+# if os.path.exists(image_folder):
+#     for filename in os.listdir(image_folder):
+#         if filename.endswith(image_extension):
+#             image_path = os.path.join(image_folder, filename)
+#             result = perform_ocr(image_path)
+#             print(f"OCR result for {image_path}: {result}")
+# else:
+#     print(f"The folder {image_folder} does not exist.")
+def resize_and_save(image_path, output_path, min_width, min_height):
+    try:
+        # Read the image
+        img = cv2.imread(image_path)
+
+        if img is None:
+            print(f"Error: Unable to read image at path {image_path}")
+            return None
+
+        # Apply resize
+        resized_img = cv2.resize(img, (min_width, min_height))
+
+        # Save the resized image
+        cv2.imwrite(output_path, resized_img)
+
+        return output_path
+    except Exception as e:
+        print(f"Error during image resizing: {e}")
+        return None
+
+# Example usage:
+input_image_path = 'apps/image_test/illegal_car_8.png'
+output_image_path = 'apps/image_test/resized_images/illegal_car_8.png'
+min_width = 300
+min_height = 150
+
+resized_path = resize_and_save(input_image_path, output_image_path, min_width, min_height)
+if resized_path:
+    print(f"Image resized and saved successfully at: {resized_path}")
+else:
+    print("Image resizing failed.")
+    
+def crop_image(image_path, output_path, x, y, width, height):
+    print("image_path", image_path)
+    try:
+        # Read the image
+        img = cv2.imread(image_path)
+
+        if img is None:
+            print(f"Error: Unable to read image at path {image_path}")
+            return None
+
+        # Print image dimensions
+        print(f"Image Dimensions: {img.shape}")
+
+        # Check if the crop coordinates are within the image dimensions
+        if x < 0 or y < 0 or x + width > img.shape[1] or y + height > img.shape[0]:
+            print("Error: Invalid crop coordinates. Check the specified values.")
+            return None
+
+        # Crop the image
+        cropped_img = img[y:y + height, x:x + width]
+
+        # Save the cropped image
+        cv2.imwrite(output_path, cropped_img)
+
+        return output_path
+    except Exception as e:
+        print(f"Error during image cropping: {e}")
+        return None
+
+input_image_path = 'apps/image_test/illegal_car_8.png'
+output_image_path = 'apps/image_test/cropped_images/illegal_car_8.png'
+
+crop_x = 10
+crop_y = 5
+crop_width = 30
+crop_height = 20
+
+cropped_path = crop_image(input_image_path, output_image_path, crop_x, crop_y, crop_width, crop_height)
+if cropped_path:
+    print(f"Image cropped and saved successfully at: {cropped_path}")
+else:
+    print("Image cropping failed.")
+    
+    
+
+def crop_car_plate(image_path, output_path):
+    # Load the image
+    img = cv2.imread(image_path)
+
+    # Resize the image
+    img = cv2.resize(img, (620, 480))
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Bilateral filtering
+    gray = cv2.bilateralFilter(gray, 13, 15, 15)
+
+    # Edge detection
+    edged = cv2.Canny(gray, 30, 200)
+
+    # Find contours
+    contours = cv2.findContours(edged.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = imutils.grab_contours(contours)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:10]
+    screenCnt = None
+
+    for c in contours:
+        # approximate the contour
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.018 * peri, True)
+        # if our approximated contour has four points, then
+        # we can assume that we have found our screen
+        if len(approx) == 4:
+            screenCnt = approx
+            break
+
+    if screenCnt is not None:
+        # Masking the part other than the number plate
+        mask = np.zeros(gray.shape, np.uint8)
+        new_image = cv2.drawContours(mask, [screenCnt], 0, 255, -1)
+        new_image = cv2.bitwise_and(img, img, mask=mask)
+
+        # Now crop
+        (x, y) = np.where(mask == 255)
+        (topx, topy) = (np.min(x), np.min(y))
+        (bottomx, bottomy) = (np.max(x), np.max(y))
+        cropped_plate = img[topx:bottomx + 1, topy:bottomy + 1]
+
+        # Save the cropped plate
+        cv2.imwrite(output_path, cropped_plate)
+
+        # Read the number plate
+        text = pytesseract.image_to_string(cropped_plate, config='--psm 11')
+        print("Detected license plate number is:", text)
+    else:
+        print("Car plate not detected.")
+
+# Example usage:
+input_image_path = 'apps/image_test/illegal_car_8.png'
+output_cropped_path = 'apps/image_test/illegal_car_88.png'
+
+crop_car_plate(input_image_path, output_cropped_path)

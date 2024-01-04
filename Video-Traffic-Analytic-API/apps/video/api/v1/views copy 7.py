@@ -128,28 +128,9 @@ class ListCreateAPIView(ListCreateAPIView):
                             hsv_car_plate = cv2.cvtColor(hsv_roi, cv2.COLOR_BGR2HSV)
                             lower_yellow = np.array([20, 100, 100])
                             upper_yellow = np.array([30, 255, 255])
-                            
-                            
-
-                            # Blue Car Plate Detection
-                            lower_blue = np.array([100, 100, 100])
-                            upper_blue = np.array([140, 255, 255])
-                            output_cropped_path_blue = f'captured_images/blue_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_blue, lower_blue, upper_blue, 'blue')
-
-                            # Red Car Plate Detection
-                            lower_red = np.array([0, 100, 100])
-                            upper_red = np.array([10, 255, 255])
-                            output_cropped_path_red = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_red, lower_red, upper_red, 'red')
-
-                            # Yellow Car Plate Detection
-                            lower_yellow = np.array([20, 100, 100])
-                            upper_yellow = np.array([30, 255, 255])
-                            output_cropped_path_yellow = f'captured_images/yellow_1_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                            detect_and_crop_car_plate(img_path_cars, output_cropped_path_yellow, lower_yellow, upper_yellow, 'yellow')
 
                             yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
+
                             contours, _ = cv2.findContours(yellow_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
                             if contours:
@@ -240,8 +221,8 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
-    
-def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper, color_name, min_width=900, min_height=300):
+
+def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper, color_name):
     try:
         img = cv2.imread(image_path)
         if img is None:
@@ -258,13 +239,6 @@ def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper,
             black_mask = cv2.inRange(plate, (0, 0, 0), (1, 1, 1))
             plate[black_mask == 255] = [255, 255, 255]
             cv2.imwrite(output_path, plate)
-            
-            if plate.shape[1] < min_width or plate.shape[0] < min_height:
-                aspect_ratio = plate.shape[1] / plate.shape[0]
-                new_width = min(min_width, int(min_height * aspect_ratio))
-                new_height = min(min_height, int(min_width / aspect_ratio))
-                plate = cv2.resize(plate, (new_width, new_height))
-
             plate_gray = cv2.cvtColor(plate, cv2.COLOR_BGR2GRAY)
             text = pytesseract.image_to_string(plate_gray, config='--psm 11')
             print(f"Detected {color_name} car plate number is:", text)
@@ -273,3 +247,16 @@ def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper,
     except Exception as e:
         print(f"Error: {e}")
         return
+
+input_image_path_red = 'apps/image_test/car_color_48.png'
+input_image_path_blue = 'apps/image_test/car_color_49.png'
+input_image_path_yellow  = 'apps/image_test/car_color_47.png'
+
+output_cropped_path_red = 'apps/image_test/car_color_47_cropped_red.png'
+detect_and_crop_car_plate(input_image_path_red, output_cropped_path_red, np.array([0, 100, 100]), np.array([10, 255, 255]), 'red')
+
+output_cropped_path_blue = 'apps/image_test/car_color_47_cropped_blue.png'
+detect_and_crop_car_plate(input_image_path_blue, output_cropped_path_blue, np.array([100, 100, 100]), np.array([140, 255, 255]), 'blue')
+
+output_cropped_path_yellow = 'apps/image_test/car_color_47_cropped_yellow.png'
+detect_and_crop_car_plate(input_image_path_yellow, output_cropped_path_yellow, np.array([20, 100, 100]), np.array([30, 255, 255]), 'yellow')
