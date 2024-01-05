@@ -278,3 +278,184 @@ def detect_and_crop_red_plate(image_path, output_path, min_width=900, min_height
 input_image_path_red = 'apps/image_test/car_color_23.png'
 output_cropped_path_red = 'apps/image_test/car_color_cropped_red.png'
 detect_and_crop_red_plate(input_image_path_red, output_cropped_path_red)
+
+
+
+
+
+def call_image_to_text_api(result_image, lang="lao"):
+    api_url = f"https://api.branah.com/api/image/imagetotext?filename={result_image}&lang={lang}"
+    print(f"api_url", api_url)
+    try:
+        while True:
+            response = requests.get(api_url)
+            response.raise_for_status()
+            if response.status_code == 202:
+                print("Waiting for API to process image...")
+                time.sleep(5)
+            else:
+                print(f"Processing complete")
+                break
+        result = response.content.encode('utf-8')
+        print(f"API Response", result)
+        return result
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling API: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+    
+cumulative_elapsed_total_time = 0
+def post_image(image_file_path):
+    global cumulative_elapsed_total_time
+    api_url = "https://api.branah.com/api/file/upload"
+    print('image not found image_file_path, image_file_path')
+    start_total_time = time.time()
+    try:
+        if os.path.exists(image_file_path):
+            with open(image_file_path, 'rb') as image_file:
+                filename = {'file': (os.path.basename(image_file.name), image_file, 'image/png')}
+                response = requests.post(api_url, files=filename) 
+                response.raise_for_status()
+                result_image = response.content.decode('utf-8') 
+                call_image_to_text_api(result_image)
+            return response
+        else:
+            print("Image file not found:", image_file_path)
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error calling API: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+    finally:
+        end_total_time = time.time()
+        elapsed_total_time = end_total_time - start_total_time
+        cumulative_elapsed_total_time += elapsed_total_time
+        print(f"Total processing time: {elapsed_total_time} seconds")
+        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time} seconds")
+
+
+relative_path = "Video-Traffic-Analytic-API/apps/image_test/2324.png"
+absolute_path = os.path.abspath(relative_path)
+print(f"Absolute path: {absolute_path}")
+cumulative_elapsed_total_time_pytesseract = 0
+
+
+def perform_ocr():
+    global cumulative_elapsed_total_time_pytesseract
+    start_total_time = time.time()
+    try:
+        # absolute_path = os.path.abspath(image_path)
+        print("absolute_path", absolute_path)
+        image_path = 'apps/image_test/9510.png'
+        img = Image.open(image_path)
+        image = Image.open(image_path)
+        dpi = (300, 300)
+        image.info['dpi'] = dpi
+        image.save(image_path, dpi=dpi)
+        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+        car_info = pytesseract.image_to_string(image_path, config=custom_config, lang='lao')
+        print(f"OCR result: {car_info}")
+        return car_info
+    except Exception as e:
+        print(f"Error during OCR: {e}")
+        return None
+    finally:
+        end_total_time = time.time()
+        elapsed_total_time = end_total_time - start_total_time
+        cumulative_elapsed_total_time_pytesseract += elapsed_total_time
+        print(f"Total processing time: {elapsed_total_time} seconds")
+        print(f"Cumulative elapsed total time: {cumulative_elapsed_total_time_pytesseract} seconds")
+
+perform_ocr()
+
+# image_folder = "Video-Traffic-Analytic-API/apps/image_test/"
+# image_extension = ".png"
+
+# if os.path.exists(image_folder):
+#     for filename in os.listdir(image_folder):
+#         if filename.endswith(image_extension):
+#             image_path = os.path.join(image_folder, filename)
+#             result = perform_ocr(image_path)
+#             print(f"OCR result for {image_path}: {result}")
+# else:
+#     print(f"The folder {image_folder} does not exist.")
+def resize_and_save(image_path, output_path, min_width, min_height):
+    try:
+        # Read the image
+        img = cv2.imread(image_path)
+
+        if img is None:
+            print(f"Error: Unable to read image at path {image_path}")
+            return None
+
+        # Apply resize
+        resized_img = cv2.resize(img, (min_width, min_height))
+
+        # Save the resized image
+        cv2.imwrite(output_path, resized_img)
+
+        return output_path
+    except Exception as e:
+        print(f"Error during image resizing: {e}")
+        return None
+
+# Example usage:
+input_image_path = 'apps/image_test/9800.png'
+output_image_path = 'apps/image_test/resized_images/89800_resized.png'
+min_width = 300
+min_height = 150
+
+resized_path = resize_and_save(input_image_path, output_image_path, min_width, min_height)
+if resized_path:
+    print(f"Image resized and saved successfully at: {resized_path}")
+else:
+    print("Image resizing failed.")
+    
+def crop_image(image_path, output_path, x, y, width, height):
+    print("image_path", image_path)
+    try:
+        # Read the image
+        img = cv2.imread(image_path)
+
+        if img is None:
+            print(f"Error: Unable to read image at path {image_path}")
+            return None
+
+        # Print image dimensions
+        print(f"Image Dimensions: {img.shape}")
+
+        # Check if the crop coordinates are within the image dimensions
+        if x < 0 or y < 0 or x + width > img.shape[1] or y + height > img.shape[0]:
+            print("Error: Invalid crop coordinates. Check the specified values.")
+            return None
+
+        # Crop the image
+        cropped_img = img[y:y + height, x:x + width]
+
+        # Save the cropped image
+        cv2.imwrite(output_path, cropped_img)
+
+        return output_path
+    except Exception as e:
+        print(f"Error during image cropping: {e}")
+        return None
+
+# Example usage with adjusted crop coordinates:
+input_image_path = 'apps/image_test/8080.png'
+output_image_path = 'apps/image_test/cropped_images/8080_cropped.png'
+
+# Adjusted crop coordinates within the valid range
+crop_x = 10
+crop_y = 5
+crop_width = 30
+crop_height = 20
+
+cropped_path = crop_image(input_image_path, output_image_path, crop_x, crop_y, crop_width, crop_height)
+if cropped_path:
+    print(f"Image cropped and saved successfully at: {cropped_path}")
+else:
+    print("Image cropping failed.")
