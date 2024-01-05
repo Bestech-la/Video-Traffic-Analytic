@@ -74,7 +74,7 @@ class ListCreateAPIView(ListCreateAPIView):
                 timestamp = date_time + timedelta(seconds=current_time)
                 print('Timestamp:', timestamp)
 
-                cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (0, 0, 255), 2)
+                cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (255, 182, 193), 2)
                 cv2.line(frame, (0, green_line_y), (frame.shape[1], green_line_y), (0, 255, 0), 2)
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -221,66 +221,60 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
-def detect_and_crop_car_plate(image_path, output_path, color_lower, color_upper, color_name, min_width=900, min_height=300):
+
+def detect_and_crop_red_plate(image_path, output_path, min_width=900, min_height=300):
     try:
         img = cv2.imread(image_path)
         if img is None:
             raise Exception(f"Error: Unable to read image at path {image_path}")
         print("image_path", image_path)
 
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        color_mask = cv2.inRange(hsv, color_lower, color_upper)
+        # Define the color range for red plates
+        lower_red = np.array([100, 50, 50])
+        upper_red = np.array([1000, 255, 255])
 
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        red_mask = cv2.inRange(hsv, lower_red, upper_red)  
+        
         # Use a closing operation to fill gaps in between object edges
         kernel = np.ones((5, 5), np.uint8)
-        color_mask_closed = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, kernel)
+        red_mask_closed = cv2.morphologyEx(red_mask, cv2.MORPH_CLOSE, kernel)
 
-        contours, _ = cv2.findContours(color_mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(red_mask_closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
 
         if contours:
-            max_contour = contours[0]
-            (x, y, w, h) = cv2.boundingRect(max_contour)
-            plate = img[y:y + h, x:x + w]
-            black_mask = cv2.inRange(plate, (0, 0, 0), (1, 1, 1))
-            plate[black_mask == 255] = [255, 255, 255]
+            max_red_area = max(contours, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(max_red_area)
 
-            if plate.shape[1] < min_width or plate.shape[0] < min_height:
-                aspect_ratio = plate.shape[1] / plate.shape[0]
+            red_car_plate = img[y:y + h, x:x + w]
+
+            if red_car_plate.shape[1] < min_width or red_car_plate.shape[0] < min_height:
+                aspect_ratio = red_car_plate.shape[1] / red_car_plate.shape[0]
                 new_width = min(min_width, int(min_height * aspect_ratio))
                 new_height = min(min_height, int(min_width / aspect_ratio))
-                resized_plate = cv2.resize(plate, (new_width, new_height))
 
-                # Save the resized plate
-                cv2.imwrite(output_path, resized_plate)
+                # Resize the region of the original color image
+                resized_region = cv2.resize(red_car_plate, (new_width, new_height))
+                
+                gray_region = cv2.cvtColor(red_car_plate, cv2.COLOR_BGR2GRAY)
+                gray = 'apps/image_test/gray_scale.png'
+                cv2.imwrite(gray, gray_region)
+                
+                # Save the resized region as a new image
+                cv2.imwrite(output_path, resized_region)
 
                 custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                car_info = pytesseract.image_to_string(resized_plate, config=custom_config, lang='lao')
-
-                # Use color-specific features to differentiate between red and yellow plates
-                if color_name == 'red' and hsv[y + h // 2, x + w // 2, 1] > 50:  # Adjust the saturation threshold as needed
-                    print(f"Detected {color_name} car plate number is:", car_info)
-                elif color_name == 'yellow' and hsv[y + h // 2, x + w // 2, 1] <= 50:  # Adjust the saturation threshold as needed
-                    print(f"Detected {color_name} car plate number is:", car_info)
-                else:
-                    print(f"Ignore {color_name} car plate. Unrecognized color.")
+                car_info = pytesseract.image_to_string(gray_region, config=custom_config, lang='lao')
+                print(f"Detected red car plate number is:", car_info)
             else:
-                print(f"{color_name.capitalize()} car plate not detected. Resizing issue.")
+                print("Red car plate not detected. Resizing issue.")
         else:
-            print(f"{color_name.capitalize()} car plate not detected. Contours not found.")
+            print("Red car plate not detected. Contours not found.")
     except Exception as e:
         print(f"Error: {e}")
         return
 
-input_image_path_red = 'apps/image_test/illegal_car_18.png'
-input_image_path_blue = 'apps/image_test/car_color_49.png'
-input_image_path_yellow  = 'apps/image_test/car_color_47.png'
-
-output_cropped_path_red = 'apps/image_test/car_color_47_cropped_red.png'
-detect_and_crop_car_plate(input_image_path_red, output_cropped_path_red, np.array([0, 100, 100]), np.array([10, 255, 255]), 'red')
-
-output_cropped_path_blue = 'apps/image_test/car_color_47_cropped_blue.png'
-detect_and_crop_car_plate(input_image_path_blue, output_cropped_path_blue, np.array([100, 100, 100]), np.array([140, 255, 255]), 'blue')
-
-output_cropped_path_yellow = 'apps/image_test/car_color_47_cropped_yellow.png'
-detect_and_crop_car_plate(input_image_path_yellow, output_cropped_path_yellow, np.array([20, 100, 100]), np.array([30, 255, 255]), 'yellow')
+input_image_path_red = 'apps/image_test/car_color_23.png'
+output_cropped_path_red = 'apps/image_test/car_color_cropped_red.png'
+detect_and_crop_red_plate(input_image_path_red, output_cropped_path_red)
