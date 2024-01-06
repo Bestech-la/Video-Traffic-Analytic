@@ -15,7 +15,7 @@ import pytesseract
 from datetime import datetime
 import time 
 import imutils
-
+from PIL import Image
 class ListCreateAPIView(ListCreateAPIView):
     queryset = Video.objects.all()
     serializer_class = VideoSerializer
@@ -37,7 +37,7 @@ class ListCreateAPIView(ListCreateAPIView):
             created_video = serializer.save()
             video_id = created_video.id
 
-            car_cascade = cv2.CascadeClassifier('model/haarcascade_cars.xml')
+            car_cascade = cv2.CascadeClassifier('model/haarcascade_eye.xml')
             height = 720
             width = 1280
 
@@ -53,10 +53,10 @@ class ListCreateAPIView(ListCreateAPIView):
 
             captured_car_plates = set()
 
-            yOne = int(yOne)
-            yTwo = int(yTwo)
-            red_line_y = yOne
-            green_line_y = yOne
+            yOne = int(100)
+            yTwo = int(520)
+            red_line_y = 471
+            green_line_y = 100
 
             start_time = None
 
@@ -73,7 +73,8 @@ class ListCreateAPIView(ListCreateAPIView):
                     
                 timestamp = date_time + timedelta(seconds=current_time)
 
-                cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (0, 0, 255), 2)
+                # cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (0, 0, 255), 2)
+                cv2.line(frame, (0, red_line_y), (frame.shape[1], red_line_y), (147, 20, 255), 2)
                 cv2.line(frame, (0, green_line_y), (frame.shape[1], green_line_y), (0, 255, 0), 2)
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -123,27 +124,8 @@ class ListCreateAPIView(ListCreateAPIView):
                             elif 150 <= dominant_hue < 180:
                                 dominant_color = "ສີຂາວ"                            
                             
+
                             hsv_car_plate = cv2.cvtColor(hsv_roi, cv2.COLOR_BGR2HSV)
-                            lower_red = np.array([100, 50, 50])
-                            upper_red = np.array([1000, 255, 255])
-                            red_mask = cv2.inRange(hsv_car_plate, lower_red, upper_red)
-                            contours_red, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                            if contours_red:
-                                max_red_area = max(contours_red, key=cv2.contourArea)
-                                x, y, w, h = cv2.boundingRect(max_red_area)
-
-                                red_car_plate = hsv_roi[y:y + h, x:x + w]
-
-                                if red_car_plate.shape[1] < min_width or red_car_plate.shape[0] < min_height:
-                                    aspect_ratio = red_car_plate.shape[1] / red_car_plate.shape[0]
-                                    new_width = min(min_width, int(min_height * aspect_ratio))
-                                    new_height = min(min_height, int(min_width / aspect_ratio))
-                                    red_car_plate = cv2.resize(red_car_plate, (new_width, new_height))
-
-                                img_path = f'captured_images/red_car_plate_{str(len(os.listdir("captured_images")) + 1)}.png'
-                                cv2.imwrite(img_path, red_car_plate)
-
-
                             lower_yellow = np.array([20, 100, 100])
                             upper_yellow = np.array([30, 255, 255])
                             yellow_mask = cv2.inRange(hsv_car_plate, lower_yellow, upper_yellow)
@@ -220,7 +202,13 @@ class ListCreateAPIView(ListCreateAPIView):
                                                 image_file_car = File(img_file_car)
                                                 report.image_two.save(os.path.basename(img_path_car), image_file_car)
                                                 img_file_car.close()
-                                                
+                             
+
+                            lower_red = np.array([0, 100, 100])
+                            upper_red = np.array([1000, 255, 255])
+                            red_mask = cv2.inRange(hsv_car_plate, lower_red, upper_red)
+                            contours_red, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                   
                             if contours_red:
                                 max_red_area = max(contours_red, key=cv2.contourArea)
                                 x_red, y_red, w_red, h_red = cv2.boundingRect(max_red_area)
@@ -238,9 +226,9 @@ class ListCreateAPIView(ListCreateAPIView):
                                     gray_region = cv2.cvtColor(red_car_plate_resized, cv2.COLOR_BGR2GRAY)
 
                                     custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                                    car_info = pytesseract.image_to_string(gray_region, config=custom_config, lang='lao')
-                                    print(car_info)
-                                    match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_info)
+                                    car_plat_red = pytesseract.image_to_string(gray_region, config=custom_config, lang='lao')
+                                    print("car_plat_red:", car_plat_red)
+                                    match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_plat_red)
                                     if match:
                                         text_part = match.group(1)
                                         number_part = match.group(2)
@@ -286,8 +274,8 @@ class ListCreateAPIView(ListCreateAPIView):
                                 cv2.imwrite(img_path_blue, blue_car_plate)
 
                                 custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                                car_info = pytesseract.image_to_string(blue_car_plate, config=custom_config, lang='lao')
-                                match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_info)
+                                car_plat_blue = pytesseract.image_to_string(blue_car_plate, config=custom_config, lang='lao')
+                                match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_plat_blue)
                                 if match:
                                     text_part = match.group(1)
                                     number_part = match.group(2)
@@ -317,5 +305,6 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Video.objects.all()
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = VideoSerializer
+
 
 

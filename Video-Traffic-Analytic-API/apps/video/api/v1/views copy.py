@@ -22,14 +22,16 @@ class ListCreateAPIView(ListCreateAPIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def perform_create(self, serializer):
+        video_car = cv2.VideoCapture('cars.mp4')
+        print("video_car", video_car)
         video_file = self.request.data.get('video')
         yOne = self.request.data.get('yOne')
         yTwo = self.request.data.get('yTwo')
         date_time = self.request.data.get('date_time')
         date_time = datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
 
-        if video_file:
-            with tempfile.NamedTemporaryFile(delete=False) as temp_video_file:
+        if video_car:
+            with tempfile.NamedTemporaryFile(delete=False) as video_car:
                 for chunk in video_file.chunks():
                     temp_video_file.write(chunk)
                 temp_video_path = temp_video_file.name
@@ -53,8 +55,10 @@ class ListCreateAPIView(ListCreateAPIView):
 
             captured_car_plates = set()
 
-            yOne = int(yOne)
-            yTwo = int(yTwo)
+            yOne = int(50)
+            yTwo = int(471)
+            print("yOne", yOne)
+            print("yTwo", yTwo)
             red_line_y = yTwo
             green_line_y = yOne
 
@@ -383,79 +387,79 @@ perform_ocr()
 #             print(f"OCR result for {image_path}: {result}")
 # else:
 #     print(f"The folder {image_folder} does not exist.")
-def resize_and_save(image_path, output_path, min_width, min_height):
-    try:
-        # Read the image
-        img = cv2.imread(image_path)
+# def resize_and_save(image_path, output_path, min_width, min_height):
+#     try:
+#         # Read the image
+#         img = cv2.imread(image_path)
 
-        if img is None:
-            print(f"Error: Unable to read image at path {image_path}")
-            return None
+#         if img is None:
+#             print(f"Error: Unable to read image at path {image_path}")
+#             return None
 
-        # Apply resize
-        resized_img = cv2.resize(img, (min_width, min_height))
+#         # Apply resize
+#         resized_img = cv2.resize(img, (min_width, min_height))
 
-        # Save the resized image
-        cv2.imwrite(output_path, resized_img)
+#         # Save the resized image
+#         cv2.imwrite(output_path, resized_img)
 
-        return output_path
-    except Exception as e:
-        print(f"Error during image resizing: {e}")
-        return None
+#         return output_path
+#     except Exception as e:
+#         print(f"Error during image resizing: {e}")
+#         return None
 
-# Example usage:
-input_image_path = 'apps/image_test/9800.png'
-output_image_path = 'apps/image_test/resized_images/89800_resized.png'
-min_width = 300
-min_height = 150
+# # Example usage:
+# input_image_path = 'apps/image_test/9800.png'
+# output_image_path = 'apps/image_test/resized_images/89800_resized.png'
+# min_width = 300
+# min_height = 150
 
-resized_path = resize_and_save(input_image_path, output_image_path, min_width, min_height)
-if resized_path:
-    print(f"Image resized and saved successfully at: {resized_path}")
-else:
-    print("Image resizing failed.")
+# resized_path = resize_and_save(input_image_path, output_image_path, min_width, min_height)
+# if resized_path:
+#     print(f"Image resized and saved successfully at: {resized_path}")
+# else:
+#     print("Image resizing failed.")
     
-def crop_image(image_path, output_path, x, y, width, height):
-    print("image_path", image_path)
-    try:
-        # Read the image
-        img = cv2.imread(image_path)
+# def crop_image(image_path, output_path, x, y, width, height):
+#     print("image_path", image_path)
+#     try:
+#         # Read the image
+#         img = cv2.imread(image_path)
 
-        if img is None:
-            print(f"Error: Unable to read image at path {image_path}")
-            return None
+#         if img is None:
+#             print(f"Error: Unable to read image at path {image_path}")
+#             return None
 
-        # Print image dimensions
-        print(f"Image Dimensions: {img.shape}")
+#         # Print image dimensions
+#         print(f"Image Dimensions: {img.shape}")
 
-        # Check if the crop coordinates are within the image dimensions
-        if x < 0 or y < 0 or x + width > img.shape[1] or y + height > img.shape[0]:
-            print("Error: Invalid crop coordinates. Check the specified values.")
-            return None
+#         # Check if the crop coordinates are within the image dimensions
+#         if x < 0 or y < 0 or x + width > img.shape[1] or y + height > img.shape[0]:
+#             print("Error: Invalid crop coordinates. Check the specified values.")
+#             return None
 
-        # Crop the image
-        cropped_img = img[y:y + height, x:x + width]
+#         # Crop the image
+#         cropped_img = img[y:y + height, x:x + width]
 
-        # Save the cropped image
-        cv2.imwrite(output_path, cropped_img)
+#         # Save the cropped image
+#         cv2.imwrite(output_path, cropped_img)
 
-        return output_path
-    except Exception as e:
-        print(f"Error during image cropping: {e}")
-        return None
+#         return output_path
+#     except Exception as e:
+#         print(f"Error during image cropping: {e}")
+#         return None
 
-# Example usage with adjusted crop coordinates:
-input_image_path = 'apps/image_test/8080.png'
-output_image_path = 'apps/image_test/cropped_images/8080_cropped.png'
+# # Example usage with adjusted crop coordinates:
+# input_image_path = 'apps/image_test/car_color_42.png'
+# output_image_path = 'apps/image_test/cropped_images/car_color_42.png'
 
-# Adjusted crop coordinates within the valid range
-crop_x = 10
-crop_y = 5
-crop_width = 30
-crop_height = 20
+# # Adjusted crop coordinates within the valid range
+# crop_x = 10
+# crop_y = 5
+# crop_width = 30
+# crop_height = 20
 
-cropped_path = crop_image(input_image_path, output_image_path, crop_x, crop_y, crop_width, crop_height)
-if cropped_path:
-    print(f"Image cropped and saved successfully at: {cropped_path}")
-else:
-    print("Image cropping failed.")
+# cropped_path = crop_image(input_image_path, output_image_path, crop_x, crop_y, crop_width, crop_height)
+# if cropped_path:
+#     print(f"Image cropped and saved successfully at: {cropped_path}")
+# else:
+#     print("Image cropping failed.")
