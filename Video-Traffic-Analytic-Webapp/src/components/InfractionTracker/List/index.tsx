@@ -43,7 +43,7 @@ export const InfractionTrackerList: React.FC = () => {
     },
   }));
   console.log("tableData", tableData)
-  // Filter.defaultProps={ refineCore };
+  Filter.defaultProps={ refineCore };
   return (
     <>
       <div className='p-5 bg-gray-200 rounded-lg'>
