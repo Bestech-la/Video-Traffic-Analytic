@@ -35,13 +35,13 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
         <button
           type="button"
           onClick={openModal}
-          className="py-3 px-4 w-44 m-2 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800"
+          className="inline-flex items-center justify-center gap-2 px-4 py-3 m-2 text-sm font-semibold text-white transition-all bg-blue-500 border border-transparent rounded-md w-44 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
         >
           ເບີ່ງລາຍລະອຽດ
         </button>
       </div>
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={closeModal}>
+        <Dialog as="div" className="relative z-10 " onClose={closeModal}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -54,8 +54,8 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
             <div className="fixed inset-0 bg-black bg-opacity-25" />
           </Transition.Child>
 
-          <div className="fixed inset-0 ">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="fixed inset-0 h-screen overflow-y-auto ">
+            <div className="flex items-center justify-center min-h-full p-4 text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
@@ -66,21 +66,19 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel
-                  className=" transform  w-3/4 rounded-2xl bg-white
-                text-left align-middle shadow-xl transition-all "
+                  className="w-3/4 text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl"
                 >
-                  <div className="flex flex-wrap  justify-center content-center  mb-6 mx-auto z-50">
-                    <div className="bg-gray-200 rounded-lg p-5">
+                  <div className="z-50 flex flex-wrap content-center justify-center mx-auto mb-6">
+                    <div className="p-5 bg-gray-200 rounded-lg">
                       {value ? (
-                        <div className="flex flex-col bg-white  rounded-lg p-2">
-                          <div className="text-4xl  text-center my-5">ລາຍລະອຽດ</div>
-
-                          <div className="flex gap-5">
+                        <div className="flex flex-col p-2 bg-white rounded-lg ">
+                          <div className="my-5 text-4xl text-center">ລາຍລະອຽດ</div>
+                          <div className="flex flex-row gap-5 sm:flex-col">
                             <div className="flex flex-col">
                               <img src={showData?.image_two} alt="" className="h-[400px] w-full object-cover rounded-lg col-span-2" />
                               <img src={showData?.image_one} alt="" className="h-[200px] w-full object-fill rounded-lg col-span-2" />
                             </div>
-                            <div className="bg-gray-200 rounded-lg   text-md space-y-2 pl-5 w-94 pt-5">
+                            <div className="pt-5 pl-5 space-y-2 bg-gray-200 rounded-lg text-md w-94">
                               <div className="p-1">ປ້າຍລົດ: {showData?.vehicle_registration_number}</div>
                               <div className="p-1"> ຍີ້ຫໍ້ລົດ: {showData?.brand}</div>
                               <div className="p-1">ສີລົດ: {showData?.vehicle_color}</div>
@@ -101,10 +99,10 @@ export const InfractionSearchShow: React.FC<IInfractionTrackerShow> = ({ value }
                       )}
                     </div>
 
-                    <div className="w-full  px-3 mt-3 md:mb-0 flex gap-x-2">
+                    <div className="flex w-full px-3 mt-3 md:mb-0 gap-x-2">
                       <button
                         type="button"
-                        className="w-full py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800"
+                        className="inline-flex items-center justify-center w-full gap-2 px-4 py-3 text-sm font-semibold text-white transition-all bg-red-500 border border-transparent rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                         onClick={closeModal}
                       >
                         ຍົກເລີກ

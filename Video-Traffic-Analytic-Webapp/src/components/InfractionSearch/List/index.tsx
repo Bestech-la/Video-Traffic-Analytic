@@ -63,21 +63,21 @@ export const InfractionSearchList: React.FC = ({}) => {
   }));
   Filters.defaultProps = { refineCore };
   return (
-    <div className=' flex  justify-center  w-3/4  gap-x-1 mx-auto'>
-      <div className=' space-y-2'>
+    <div className='flex flex-row justify-center w-3/4 p-2 mx-auto overflow-scroll md:flex-col gap-x-5 gap-y-5'>
+      <div className='space-y-2 '>
         <Filters refineCore={undefined} setPlatNumber={setPlatNumber} />
         <CardDetail tracker_data={tracker_data} />
       </div>
 
-      <div className='bg-gray-200 rounded-lg p-5 w-full '>
-        <div className='max-w-full  px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto h-auto bg-white rounded-lg flex flex-col'>
-          <div className='text-center text-2xl'>ຄົ້ນຫາລົດທີ່ລ່ວງລະເມີດ</div>
-          <div className='flex  mb-5'></div>
+      <div className='w-full p-5 bg-gray-200 rounded-lg '>
+        <div className='flex flex-col h-auto max-w-full px-4 py-10 mx-auto bg-white rounded-lg sm:px-6 lg:px-8 lg:py-14'>
+          <div className='text-2xl text-center'>ຄົ້ນຫາລົດທີ່ລ່ວງລະເມີດ</div>
+          <div className='flex mb-5'></div>
           <div className='flex gap-2'>
             <div className='w-full'>
               <div className='-m-1.5 overflow-x-auto'>
                 <div className='p-1.5 min-w-full inline-block align-middle'>
-                  <div className='bg-white h-full z-10 border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-slate-900 dark:border-gray-700'>
+                  <div className='z-10 h-full overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-slate-900 dark:border-gray-700'>
                     <table className='min-w-full divide-y divide-gray-400 dark:divide-gray-700'>
                       <thead className='bg-gray-50 dark:bg-gray-700'>
                         {getHeaderGroups().map((headerGroup) => (
@@ -86,7 +86,7 @@ export const InfractionSearchList: React.FC = ({}) => {
                               <th
                                 key={header.id}
                                 scope='col'
-                                className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase'
+                                className='px-6 py-3 text-xs font-medium text-center text-gray-500 uppercase'
                               >
                                 {!header.isPlaceholder &&
                                   flexRender(
@@ -100,11 +100,11 @@ export const InfractionSearchList: React.FC = ({}) => {
                       </thead>
                       <tbody className='divide-y divide-gray-400 dark:divide-gray-700'>
                         {getRowModel().rows.map((row) => (
-                          <tr key={row.id} className=' text-center'>
+                          <tr key={row.id} className='text-center '>
                             {row.getVisibleCells().map((cell) => (
                               <td
                                 key={cell.id}
-                                className='px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200'
+                                className='px-6 py-4 text-sm text-gray-800 whitespace-nowrap dark:text-gray-200'
                               >
                                 {flexRender(
                                   cell.column.columnDef.cell,
@@ -117,7 +117,7 @@ export const InfractionSearchList: React.FC = ({}) => {
                         ))}
                       </tbody>
                     </table>
-                    <div className='px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-gray-700'>
+                    <div className='grid gap-3 px-6 py-4 border-t border-gray-200 md:flex md:justify-between md:items-center dark:border-gray-700'>
                       <Pagination
                         getState={getState}
                         setPageSize={setPageSize}

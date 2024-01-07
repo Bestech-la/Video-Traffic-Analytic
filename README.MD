@@ -1,5 +1,7 @@
 # Video-Traffic-Analytic-Webapp
+
 the application using refinedjs, nextjs, storybook and tailwindcss
+
 ## Webapp
 
     cd Video-Traffic-Analytic-Webapp
@@ -7,7 +9,6 @@ the application using refinedjs, nextjs, storybook and tailwindcss
 ## Install dependency
 
     npm install
-
 
 ### Create .env
 
@@ -17,18 +18,17 @@ the application using refinedjs, nextjs, storybook and tailwindcss
     API_ENDPOINT=your_backend_api_endpoint
     NEXTAUTH_URL_INTERNAL=your_frontend_api
     SECRET_KEY=your_secret_key
+
 ## Run app
 
     npm run dev
 
-and go url: http://localhost:3000/   
+and go url: <http://localhost:3000/>
 
 ## Run story book
 
     npm run storybook
-and go url: http://localhost:6006/    
-
-
+and go url: <http://localhost:6006/>
 
 # Video-Traffic-Analytic-API
 
@@ -36,6 +36,7 @@ This application enables Django powered websites to have multiple tenants via Po
 
     # Create a new database
     CREATE DATABASE 'video_traffic_analytic'
+
 ## API
 
 To work with the API, navigate to the `Video-Traffic-Analytic-API` directory:
@@ -50,8 +51,8 @@ Activate environment
     source venv/bin/activate
 
 ## Install dependencies
-    pip install -r dev-requirements.txt
 
+    pip install -r dev-requirements.txt
 
 Basic Settings
 You’ll have to make the following creations to your your .env file
@@ -79,6 +80,5 @@ This revised version specifies that the `.env` file should be created in the `Vi
     python manage.py runserver
 
 ## Go to
+
     localhost:8000/admin/ or localhost:8000/swagger/
-
-

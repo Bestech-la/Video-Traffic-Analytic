@@ -42,15 +42,15 @@ export const InfractionTrackerList: React.FC = () => {
       ...prev.meta,
     },
   }));
-  console.log("tableData", tableData)
-  // Filter.defaultProps={ refineCore };
+  // console.log("tableData", tableData)
+  Filter.defaultProps={ refineCore };
   return (
     <>
       <div className='p-5 bg-gray-200 rounded-lg'>
         <div className='flex flex-col h-auto max-w-full px-4 py-10 mx-auto bg-white rounded-lg sm:px-6 lg:px-8 lg:py-14'>
           <div className='text-2xl text-center'>ລາຍງຍລົດທີ່ລ່ວງລະເມີດ</div>
           <div className='flex justify-end mb-5'>
-            <Filter refineCore={undefined} />
+            {/* <Filter refineCore={undefined} /> */}
           </div>
           <div className='flex flex-col'>
             <div className='-m-1.5 overflow-x-auto'>
