@@ -63,7 +63,7 @@ export const InfractionSearchList: React.FC = ({}) => {
   }));
   Filters.defaultProps = { refineCore };
   return (
-    <div className='flex justify-center w-3/4 mx-auto gap-x-1'>
+    <div className='flex flex-row justify-center w-3/4 p-2 mx-auto overflow-scroll md:flex-col gap-x-5 gap-y-5'>
       <div className='space-y-2 '>
         <Filters refineCore={undefined} setPlatNumber={setPlatNumber} />
         <CardDetail tracker_data={tracker_data} />
