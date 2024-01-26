@@ -293,7 +293,7 @@ def read_text(image_path):
         print(f"An error occurred: {e}")
     return None
 
-input_image_path = 'apps/image_test/0088.png'
+input_image_path = 'apps/image_test/Lao.carPlate.exp133.png'
 result = read_text(input_image_path)
 
 if result is not None:
