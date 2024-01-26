@@ -287,7 +287,7 @@ def read_text(image_path):
             raise FileNotFoundError(f"Unable to load image file: {image_path}")
 
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite('preprocessed_image.png', gray_image)
+        cv2.imwrite('apps/image_test/preprocessed_image.png', gray_image)
         custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
         print("Custom Config:", custom_config)
         car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
