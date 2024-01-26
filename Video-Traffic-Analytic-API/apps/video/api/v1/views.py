@@ -14,7 +14,6 @@ import re
 import pytesseract
 from datetime import datetime
 import time 
-import imutils
 from PIL import Image
 class ListCreateAPIView(ListCreateAPIView):
     queryset = Video.objects.all()
@@ -176,8 +175,11 @@ class ListCreateAPIView(ListCreateAPIView):
                                 dpi = (300, 300)
                                 image.info['dpi'] = dpi
                                 image.save(img_path, dpi=dpi)
-                                custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
-                                car_info = pytesseract.image_to_string(yellow_car_plate, config=custom_config, lang='lao')
+                                # custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+                                # car_info = pytesseract.image_to_string(yellow_car_plate, config=custom_config, lang='lao')
+                                custom_config = r'--oem 3 --psm 6 -l Lao'
+                                car_info = pytesseract.image_to_string(yellow_car_plate, config=custom_config)
+
                                 match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_info)
                                 if match:
                                     text_part = match.group(1)
