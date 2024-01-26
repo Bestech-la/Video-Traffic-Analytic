@@ -277,6 +277,9 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = VideoSerializer
     
 
+import cv2
+import pytesseract
+
 def read_text(image_path):
     try:
         image = cv2.imread(image_path)
@@ -284,8 +287,12 @@ def read_text(image_path):
             raise FileNotFoundError(f"Unable to load image file: {image_path}")
 
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        cv2.imwrite('preprocessed_image.png', gray_image)
         custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
+        print("Custom Config:", custom_config)
         car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
+        print("car_plate_text:", car_plate_text)
+        
         return car_plate_text
     except Exception as e:
         print(f"An error occurred: {e}")
