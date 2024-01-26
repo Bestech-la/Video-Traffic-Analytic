@@ -34,7 +34,7 @@ export const Header = (): ColumnDef<IVehicleData>[] => {
       cell ({ row }) {
         const rowData = row.original;
         return (
-          <div className="flex flex-col items-start bg-gray-200 rounded-lg text-black p-5">
+          <div className="flex flex-col items-start p-5 text-black bg-gray-200 rounded-lg">
             <div className="text-lg text-center">
               ປ້າຍລົດ: <span>{rowData.vehicle_registration_number}</span>
             </div>
@@ -48,7 +48,7 @@ export const Header = (): ColumnDef<IVehicleData>[] => {
               ສີປ້າຍ: <span>{rowData.vehicle_registration_color}</span>
             </div>
             <div className="text-lg text-center">
-             ແຂວງ: <span>{}</span>
+             ແຂວງ: <span>{rowData.province}</span>
             </div>
             <div className="text-lg text-center">
             ຍີ້ຫໍ້ລົດ: <span>{}</span>

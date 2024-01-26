@@ -277,24 +277,17 @@ class RetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = VideoSerializer
     
 
-def read_text(image_path):
-    try:
-        image = cv2.imread(image_path)
-        if image is None:
-            raise FileNotFoundError(f"Unable to load image file: {image_path}")
 
-        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
-        car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
-        return car_plate_text
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
+def read_text(image_file_path):
 
-input_image_path = 'apps/image_test/0088.png'
-result = read_text(input_image_path)
+            gray_region = cv2.cvtColor(red_car_plate_resized, cv2.COLOR_BGR2GRAY)
 
-if result is not None:
-    print("Car Plate Text:", result)
-else:
-    print("Failed to extract text from the image.")
+                                    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
+                                    car_plat_red = pytesseract.image_to_string(gray_region, config=custom_config, lang='lao')
+                                    print("car_plat_red:", car_plat_red)
+
+
+relative_path = "Video-Traffic-Analytic-API/apps/image_test/2324.png"
+absolute_path = os.path.abspath(relative_path)
+print(f"Absolute path: {absolute_path}")
+cumulative_elapsed_total_time_pytesseract = 0

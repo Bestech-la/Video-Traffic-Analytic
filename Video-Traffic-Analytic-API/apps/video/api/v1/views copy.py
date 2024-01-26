@@ -94,7 +94,7 @@ class ListCreateAPIView(ListCreateAPIView):
                             hsv_roi = frame[y:y + h, x:x + w]
 
                             if y < green_line_y:
-                                continue  # Skip capturing if it's crossing a green light
+                                continue 
 
                             img_path_cars = f'captured_images/car_color_{str(len(os.listdir("captured_images")) + 1)}.png'
                             cv2.imwrite(img_path_cars, hsv_roi)
@@ -203,14 +203,12 @@ class ListCreateAPIView(ListCreateAPIView):
                                                 )
                                                 report.image_one.save(os.path.basename(img_path), image_file)
                                                 img_file.close()
-                                                # os.remove(img_path)
                                                 print("Report saved with ID:", report.id)
 
                                             with open(img_path_car, 'rb') as img_file_car:
                                                 image_file_car = File(img_file_car)
                                                 report.image_two.save(os.path.basename(img_path_car), image_file_car)
                                                 img_file_car.close()
-                                                # os.remove(img_path_car)
                                                 print("Car image saved for report with ID:", report.id)
                                         else:
                                             print("Image not saved (already captured):", img_path)
