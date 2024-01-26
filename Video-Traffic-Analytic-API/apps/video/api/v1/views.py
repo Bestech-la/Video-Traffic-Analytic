@@ -285,7 +285,7 @@ def read_text(image_path):
 
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
-        car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
+        car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='Lao.carPlate')
         return car_plate_text
     except Exception as e:
         print(f"An error occurred: {e}")
