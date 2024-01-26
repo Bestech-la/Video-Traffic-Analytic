@@ -287,11 +287,9 @@ def read_text(image_path):
         custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
         car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
         return car_plate_text
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
-    return None
+        return None
 
 input_image_path = 'apps/image_test/Lao.carPlate.exp133.png'
 result = read_text(input_image_path)
