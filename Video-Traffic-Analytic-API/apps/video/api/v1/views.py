@@ -146,10 +146,16 @@ class ListCreateAPIView(ListCreateAPIView):
                                     cv2.imwrite(img_path_red, red_car_plate_resized)
                                     gray_region = cv2.cvtColor(red_car_plate_resized, cv2.COLOR_BGR2GRAY)
 
-                                    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
+                                    custom_config = r'--oem 3 --psm 6 -l lao'
+
+
                                     car_plat_red = pytesseract.image_to_string(gray_region, config=custom_config, lang='lao')
-                                    print("car_plat_red:", car_plat_red)
-                                    match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_plat_red)
+                                    print("car_plat_red:", match)
+                                    
+                                    match = re.match(r'([ກ-ຂກ-ໝ]{2})\s*(\d{4})(?:[\s|,|\\|/]+|,\s*)', car_plat_red)
+
+                                    print("match:", match)
+                                    
                                     if match:
                                         text_part = match.group(1)
                                         number_part = match.group(2)
@@ -195,7 +201,11 @@ class ListCreateAPIView(ListCreateAPIView):
                                     cv2.imwrite(img_path_white, white_car_plate_resized)
                                     
                                     gray_white_plate = cv2.cvtColor(white_car_plate_resized, cv2.COLOR_BGR2GRAY)
-                                    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+                                    # custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'  # Lao characters
+                                    # custom_config = r'--oem 3 --psm 6 -l lao'
+                                    # Adjusted custom_config for Windows and Lao language
+                                    custom_config = r'--oem 3 --psm 6 -l lao -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZຂກຄງຈຊຍດຕຖທນບປຜຝພຟມຢຣລວສຫຬອຮຯະັາຳີຶືຸູົຼຽ'
+
                                     car_plate_white = pytesseract.image_to_string(gray_white_plate, config=custom_config, lang='lao')
                                     match = re.match(r'([ກ-ໝ]{2})(\d{4})', car_plate_white)
                                     if match:
@@ -287,9 +297,12 @@ def read_text(image_path):
             raise FileNotFoundError(f"Unable to load image file: {image_path}")
 
         gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        cv2.imwrite('apps/image_test/preprocessed_image.png', gray_image)
-        custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
-        print("Custom Config:", custom_config)
+        cv2.imwrite('preprocessed_image.png', gray_image)
+        # custom_config = r'--oem 3 --psm 6 -l lao -c tessedit_char_whitelist=0123456789ຂກຄຈຍດຕທນບຜພມລວສຫອຮ'
+        # custom_config = r'--oem 3 --psm 6 -l lao '
+        # custom_config = r'--oem 3 --psm 6 Lao.carPlate+la'
+        custom_config = r'--oem 3 --psm 6 -l lao '
+        
         car_plate_text = pytesseract.image_to_string(gray_image, config=custom_config, lang='lao')
         print("car_plate_text:", car_plate_text)
         
