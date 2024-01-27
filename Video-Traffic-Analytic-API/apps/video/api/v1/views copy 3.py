@@ -207,7 +207,6 @@ class ListCreateAPIView(ListCreateAPIView):
             ]
             # Print the indices of the matched plate numbers
             print("Indices of matched plate numbers in founded_plate_number:")
-            print("captured_car_plates_image", captured_car_plates_image)
             for index in matched_indices:
                 img_file_red = captured_car_plates_image[index]
                 print("img_file_red", img_file_red)

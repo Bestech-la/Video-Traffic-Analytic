@@ -199,30 +199,42 @@ class ListCreateAPIView(ListCreateAPIView):
                 if plate.group().split()[-1] in number_counts and number_counts[plate.group().split()[-1]] > 5
             )
 
-# Get indices of the unique plate numbers
             matched_indices = [
                 index
                 for index, plate in enumerate(founded_plate_number)
                 if plate.group().split()[-1] in unique_plate_numbers and unique_plate_numbers.remove(plate.group().split()[-1]) is None
             ]
+
             # Print the indices of the matched plate numbers
+            # Print the indices of the matched plate numbers
+            # Print the indices of the matched plate numbers
+ # Print the indices of the matched plate numbers
             print("Indices of matched plate numbers in founded_plate_number:")
-            print("captured_car_plates_image", captured_car_plates_image)
             for index in matched_indices:
-                img_file_red = captured_car_plates_image[index]
-                print("img_file_red", img_file_red)
-                match = founded_plate_number[index]
-                print("match", match)
-                text_part = match.group(1)
-                number_part = match.group(2)
+                matched_plate_number = founded_plate_number[index]
+                matched_plate_image_path = captured_car_plates_image[index]
+
+                print("matched_plate_image_path:", matched_plate_image_path)
+                print("matched_plate_number:", matched_plate_number.group())
+
+                text_part = matched_plate_number.group(1)
+                number_part = matched_plate_number.group(2)
+
                 if len(text_part) == 2 and number_part.isdigit() and len(number_part) == 4:
                     car_plate = f'{text_part} {number_part}'
+
                     if car_plate not in captured_car_plates:
-                        captured_car_plates.add(
-                            car_plate)
-                        with open(img_path_red, 'rb') as img_file_red:
-                            image_file_red = File(
-                                img_file_red)
+                        captured_car_plates.add(car_plate)
+
+                        # Save the image in PNG format
+                        img_path_png = os.path.splitext(
+                            matched_plate_image_path)[0] + ".png"
+                        Image.open(matched_plate_image_path).save(img_path_png)
+
+                        with open(img_path_png, 'rb') as matched_plate_image_file:
+                            matched_plate_image = File(
+                                matched_plate_image_file)
+
                             report = InfractionTracker.objects.create(
                                 vehicle_registration_number=car_plate,
                                 vehicle_color=dominant_color,
@@ -231,16 +243,16 @@ class ListCreateAPIView(ListCreateAPIView):
                                 date_time=timestamp,
                                 province="ກໍາແພງນະຄອນ",
                             )
-                            report.image_one.save(os.path.basename(
-                                img_path_red), image_file_red)
-                            img_file_red.close()
 
-                        with open(img_path_car, 'rb') as img_file_car:
-                            image_file_car = File(
-                                img_file_car)
-                            report.image_two.save(os.path.basename(
-                                img_path_car), image_file_car)
-                            img_file_car.close()
+                            # Save the PNG image file to the appropriate field
+                            report.image_one.save(os.path.basename(
+                                img_path_png), matched_plate_image)
+
+                            matched_plate_image_file.close()
+
+                        # Remove the original image file
+                        os.remove(matched_plate_image_path)
+
         cap.release()
 
 
