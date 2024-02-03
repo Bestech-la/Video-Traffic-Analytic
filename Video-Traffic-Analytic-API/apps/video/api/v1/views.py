@@ -18,6 +18,7 @@ from collections import Counter
 founded_number = []
 founded_plate_number = []
 captured_car_plates_image = []
+captured_car = []
 
 
 class ListCreateAPIView(ListCreateAPIView):
@@ -171,58 +172,68 @@ class ListCreateAPIView(ListCreateAPIView):
 
                                     car_plat_red = pytesseract.image_to_string(
                                         gray_region, config=custom_config)
-                                    print(f"car_plat_red", car_plat_red)
                                     match_number = re.search(
                                         r'\b\d{4}\b', car_plat_red)
-                                    print(f"number", match_number)
                                     if match_number:
                                         founded_number.append(
                                             match_number)
                                     match = re.match(
                                         r'([ກຂຄງດຍບລ]+)\s+(\d{4})', car_plat_red)
-                                    print(f"car_plat_red", match)
                                     if match:
                                         founded_plate_number.append(
                                             match)
+                                        captured_car.append(img_path_car)
                                         captured_car_plates_image.append(
                                             img_path_red)
-            print(founded_number, founded_plate_number)
 
             matched_numbers = [match.group() for match in founded_number]
-
             number_counts = Counter(matched_numbers)
-
             # Get unique plate numbers with occurrences more than 5
+            print("number_counts", number_counts)
             unique_plate_numbers = set(
                 plate.group().split()[-1]
                 for index, plate in enumerate(founded_plate_number)
-                if plate.group().split()[-1] in number_counts and number_counts[plate.group().split()[-1]] > 5
+                if plate.group().split()[-1] in number_counts and number_counts[plate.group().split()[-1]] > len(founded_number)*0.212
             )
 
-# Get indices of the unique plate numbers
             matched_indices = [
                 index
                 for index, plate in enumerate(founded_plate_number)
                 if plate.group().split()[-1] in unique_plate_numbers and unique_plate_numbers.remove(plate.group().split()[-1]) is None
             ]
-            # Print the indices of the matched plate numbers
-            print("Indices of matched plate numbers in founded_plate_number:")
-            print("captured_car_plates_image", captured_car_plates_image)
+            print("matched_indices", matched_indices)
+            print("captured_car_plates_image:", captured_car_plates_image)
+            print("captured_car:", captured_car)
+
             for index in matched_indices:
-                img_file_red = captured_car_plates_image[index]
-                print("img_file_red", img_file_red)
-                match = founded_plate_number[index]
-                print("match", match)
-                text_part = match.group(1)
-                number_part = match.group(2)
+                matched_plate_number = founded_plate_number[index]
+                matched_plate_image_path = captured_car_plates_image[index]
+                captured_car_path = captured_car[index]
+
+                print("matched_plate_image_path:", matched_plate_image_path)
+                print("matched_plate_number:", matched_plate_number.group())
+
+                text_part = matched_plate_number.group(1)
+                number_part = matched_plate_number.group(2)
+
                 if len(text_part) == 2 and number_part.isdigit() and len(number_part) == 4:
                     car_plate = f'{text_part} {number_part}'
+
                     if car_plate not in captured_car_plates:
-                        captured_car_plates.add(
-                            car_plate)
-                        with open(img_path_red, 'rb') as img_file_red:
-                            image_file_red = File(
-                                img_file_red)
+                        captured_car_plates.add(car_plate)
+
+                        img_path_png_one = os.path.splitext(
+                            matched_plate_image_path)[0] + "_one.png"
+                        img_path_png_two = os.path.splitext(
+                            captured_car_path)[0] + "_two.png"
+
+                        img = cv2.imread(matched_plate_image_path)
+                        cv2.imwrite(img_path_png_one, img)
+
+                        with open(img_path_png_one, 'rb') as matched_plate_image_file_one:
+                            matched_plate_image_one = File(
+                                matched_plate_image_file_one)
+
                             report = InfractionTracker.objects.create(
                                 vehicle_registration_number=car_plate,
                                 vehicle_color=dominant_color,
@@ -231,16 +242,20 @@ class ListCreateAPIView(ListCreateAPIView):
                                 date_time=timestamp,
                                 province="ກໍາແພງນະຄອນ",
                             )
+                            print("report", report)
                             report.image_one.save(os.path.basename(
-                                img_path_red), image_file_red)
-                            img_file_red.close()
+                                img_path_png_one), matched_plate_image_one)
 
-                        with open(img_path_car, 'rb') as img_file_car:
-                            image_file_car = File(
-                                img_file_car)
+                        img_car = cv2.imread(captured_car_path)
+                        cv2.imwrite(img_path_png_two, img_car)
+
+                        with open(img_path_png_two, 'rb') as img_file_car:
+                            image_file_car = File(img_file_car)
                             report.image_two.save(os.path.basename(
-                                img_path_car), image_file_car)
+                                img_path_png_two), image_file_car)
                             img_file_car.close()
+                            matched_plate_image_file_one.close()
+
         cap.release()
 
 
