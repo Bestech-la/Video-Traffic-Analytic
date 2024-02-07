@@ -188,8 +188,6 @@ class ListCreateAPIView(ListCreateAPIView):
 
             matched_numbers = [match.group() for match in founded_number]
             number_counts = Counter(matched_numbers)
-            # Get unique plate numbers with occurrences more than 5
-            print("number_counts", number_counts)
             unique_plate_numbers = set(
                 plate.group().split()[-1]
                 for index, plate in enumerate(founded_plate_number)
@@ -201,17 +199,10 @@ class ListCreateAPIView(ListCreateAPIView):
                 for index, plate in enumerate(founded_plate_number)
                 if plate.group().split()[-1] in unique_plate_numbers and unique_plate_numbers.remove(plate.group().split()[-1]) is None
             ]
-            print("matched_indices", matched_indices)
-            print("captured_car_plates_image:", captured_car_plates_image)
-            print("captured_car:", captured_car)
-
             for index in matched_indices:
                 matched_plate_number = founded_plate_number[index]
                 matched_plate_image_path = captured_car_plates_image[index]
                 captured_car_path = captured_car[index]
-
-                print("matched_plate_image_path:", matched_plate_image_path)
-                print("matched_plate_number:", matched_plate_number.group())
 
                 text_part = matched_plate_number.group(1)
                 number_part = matched_plate_number.group(2)
@@ -242,7 +233,6 @@ class ListCreateAPIView(ListCreateAPIView):
                                 date_time=timestamp,
                                 province="ກໍາແພງນະຄອນ",
                             )
-                            print("report", report)
                             report.image_one.save(os.path.basename(
                                 img_path_png_one), matched_plate_image_one)
 
