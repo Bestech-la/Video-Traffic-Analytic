@@ -13,7 +13,7 @@ the application using refinedjs, nextjs, storybook and tailwindcss
 ### Create .env
 
     touch .env
-    
+
     NEXTAUTH_URL=your_frontend_api
     API_ENDPOINT=your_backend_api_endpoint
     NEXTAUTH_URL_INTERNAL=your_frontend_api
@@ -28,6 +28,7 @@ and go url: <http://localhost:3000/>
 ## Run story book
 
     npm run storybook
+
 and go url: <http://localhost:6006/>
 
 # Video-Traffic-Analytic-API
@@ -82,3 +83,11 @@ This revised version specifies that the `.env` file should be created in the `Vi
 ## Go to
 
     localhost:8000/admin/ or localhost:8000/swagger/
+
+captured_car_plates_image [
+'captured_images/red_car_plate_15.png',
+'captured_images/red_car_plate_51.png',
+'captured_images/red_car_plate_66.png',
+'captured_images/red_car_plate_75.png',
+'captured_images/red_car_plate_87.png',
+'captured_images/red_car_plate_93.png']
