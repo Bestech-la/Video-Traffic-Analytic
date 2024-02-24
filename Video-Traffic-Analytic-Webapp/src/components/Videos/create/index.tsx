@@ -183,17 +183,17 @@ export const VideosCreate: React.FC = () => {
                     <span className="text-sm ms-2">Tesseract OCR</span>
                   </label>
                   <label
-                    htmlFor="cnn"
+                    htmlFor="YOLOv5"
                     className="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 "
                   >
                     <input
                       type="radio"
                       {...register('algorithm')}
-                      value={'cnn'}
+                      value={'YOLOv5'}
                       className="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="cnn"
+                      id="YOLOv5"
                     />
-                    <span className="text-sm ms-2">CNN</span>
+                    <span className="text-sm ms-2">YOLOv5</span>
                   </label>
                   <label
                     htmlFor="VGGI9"

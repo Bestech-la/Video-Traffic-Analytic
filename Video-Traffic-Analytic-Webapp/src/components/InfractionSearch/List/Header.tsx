@@ -9,10 +9,10 @@ export const Header = (): ColumnDef<any>[] => {
       id: 'image_one',
       header: 'ຮູບພາບທີ 1',
       accessorKey: 'image_one',
-      cell ({ row }) {
+      cell({ row }) {
         const rowData = row.original;
         return (
-          <div className='w-40 '>
+          <div className="w-40 ">
             <img src={rowData.image_two} alt="bill_2" className="h-[300pxpx] w-full m-auto object-fill" />
             <img src={rowData.image_one} alt="bill_1" className="h-[120px] w-[300px] m-auto object-fill" />
           </div>
@@ -23,7 +23,7 @@ export const Header = (): ColumnDef<any>[] => {
       id: 'car_detail',
       header: 'ຂໍມູນລົດ',
       accessorKey: 'image_one',
-      cell ({ row }) {
+      cell({ row }) {
         const rowData = row.original;
         return (
           <div className="flex flex-col items-start p-5 text-black bg-gray-200 rounded-lg">
@@ -40,10 +40,13 @@ export const Header = (): ColumnDef<any>[] => {
               ສີປ້າຍ: <span>{rowData.vehicle_registration_color}</span>
             </div>
             <div className="text-lg text-center">
-             ແຂວງ: <span>{}</span>
+              ແຂວງ: <span>{}</span>
             </div>
             <div className="text-lg text-center">
-            ຍີ້ຫໍ້ລົດ: <span>{}</span>
+              ຍີ້ຫໍ້ລົດ: <span>{}</span>
+            </div>
+            <div className="text-lg text-center">
+              ອ່ານດ້ວຍ: <span>{rowData.algorithm}</span>
             </div>
           </div>
         );
