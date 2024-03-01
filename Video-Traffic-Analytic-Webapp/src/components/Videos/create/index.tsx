@@ -196,17 +196,17 @@ export const VideosCreate: React.FC = () => {
                     <span className="text-sm ms-2">YOLOv5</span>
                   </label>
                   <label
-                    htmlFor="VGGI9"
+                    htmlFor="Mask-R-CNN"
                     className="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 "
                   >
                     <input
                       type="radio"
                       {...register('algorithm')}
-                      value={'VGGI9'}
+                      value={'Mask-R-CNN'}
                       className="shrink-0 mt-0.5 border-gray-200 rounded-full text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800"
-                      id="VGGI9"
+                      id="Mask-R-CNN"
                     />
-                    <span className="text-sm ms-2">VGGI9</span>
+                    <span className="text-sm ms-2">Mask-R CNN</span>
                   </label>
                 </div>
               </div>
